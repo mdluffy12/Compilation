@@ -2,6 +2,16 @@ package slp;
 
 import java.io.IOException;
 
+import slp.ClassField;
+import slp.Environment;
+import slp.ICClass;
+import slp.MethodFormal;
+import slp.ObjectClassType;
+import slp.PrimitiveType;
+import slp.Program;
+import slp.StaticMethod;
+import slp.VirtualMethod;
+
 /** Evaluates straight line programs.
  */
 public class SLPEvaluator implements PropagatingVisitor<Environment, Integer> {
@@ -124,5 +134,37 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, Integer> {
 			throw new RuntimeException("Encountered unexpected operator type: " + expr.op);
 		}
 		return new Integer(result);
+	}
+	public Integer visit(Program prog, Environment env)
+	{
+		return null;
+	}
+	public Integer visit(ICClass cls, Environment env)
+	{
+		return null;
+	}
+	public Integer visit(ClassField field, Environment env)
+	{
+		return null;
+	}
+	public Integer visit(MethodFormal formal, Environment env)
+	{
+		return null;
+	}
+	public Integer visit(StaticMethod method, Environment env)
+	{
+		return null;
+	}
+	public Integer visit(VirtualMethod method, Environment env)
+	{
+		return null;
+	}
+	public Integer visit(PrimitiveType ptype, Environment env)
+	{
+		return null;
+	}
+	public Integer visit(ObjectClassType octype, Environment env)
+	{
+		return null;
 	}
 }

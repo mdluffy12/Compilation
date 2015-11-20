@@ -113,12 +113,17 @@ non terminal Expr expr;
 non terminal Stmt stmt;
 non terminal StmtList stmt_list;
 
+non terminal FunctionCall;
+non terminal StaticCall;
+non terminal VirtualCall;
+non terminal Location;
+non terminal Literal;
+
 precedence left LOR;
 precedence left LAND;
 precedence left PLUS, MINUS;
-precedence left DIV, MULT;
-precedence left UMINUS;
-precedence left GT, LT, GE, LE;
+precedence left DIVIDE, MULTIPLY;
+precedence left GT, LT, GTE, LTE;
 
 /**********************/
 /*   THE IC GRAMMER   */
@@ -183,7 +188,7 @@ more_fields ::= COMMA ID:field_name more_fields:field_names_lst
 			 	field_names_lst.add(0, field_name.toString());
 			 	RESULT = field_names_lst;
 			 :}
-			| SEMICOLON
+			| SEMI
  			{:
  				RESULT = new ArrayList<String>();
  			:}
@@ -246,7 +251,7 @@ type ::= type:t LB RB
 		{:
 			RESULT = new PrimitiveType(DataTypes.BOOLEAN);
 		:}
-		| STRING_WORD:s
+		| QUOTE:s
 		{:
 			RESULT = new PrimitiveType(DataTypes.STRING);
 		:}
@@ -261,10 +266,10 @@ stmt_list ::= stmt:s
 	| stmt_list:sl stmt:s
 	{: sl.addStmt(s); RESULT = sl; :}
 ;
-
+/*
 stmt ::= VAR:v ASSIGN expr:e SEMI
 	{: VarExpr ve = new VarExpr(v); RESULT = new AssignStmt(ve, e); :}
-	| PRINT LPAREN expr:e RPAREN SEMI
+	| PRINT LP expr:e RP SEMI
 	{: RESULT = new PrintStmt(e); :}
 ;
 
@@ -276,11 +281,11 @@ expr ::= expr:e1 PLUS:p expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.MINUS);
 		   System.out.println("Reduced rule e1 - e2 for e1=" + e1 + " and e2="+e2);
 		 :}
-		| expr:e1 MULT expr:e2
+		| expr:e1 MULTIPLY expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.MULT);
 		   System.out.println("Reduced rule e1 * e2 for e1=" + e1 + " and e2="+e2);
 		 :}
-		| expr:e1 DIV expr:e2
+		| expr:e1 DIVIDE expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.DIV);
 		   System.out.println("Reduced rule e1 / e2 for e1=" + e1 + " and e2="+e2);
 		 :}
@@ -300,22 +305,58 @@ expr ::= expr:e1 PLUS:p expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.GT);
 		   System.out.println("Reduced rule e1 > e2 for e1=" + e1 + " and e2="+e2);
 		 :}
-		| expr:e1 LE expr:e2
+		| expr:e1 LTE expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.LE);
 		   System.out.println("Reduced rule e1 <= e2 for e1=" + e1 + " and e2="+e2);
 		 :}
-		| expr:e1 GE expr:e2
+		| expr:e1 GTE expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.GE);
 		   System.out.println("Reduced rule e1 >= e2 for e1=" + e1 + " and e2="+e2);
 		 :}
 		| MINUS expr:e1
-		{: RESULT = new UnaryOpExpr(e1, Operator.MINUS); :} %prec UMINUS
-		| LPAREN expr:e RPAREN
+		{: RESULT = new UnaryOpExpr(e1, Operator.MINUS); :} 
+		| LP expr:e RP
 		{: RESULT = e; :}
-		| NUMBER:n
+		| INTEGER:n
 		{: RESULT = new NumberExpr(n.intValue()); :}
-		| READI LPAREN RPAREN
+		| READI LP RP
 		{: RESULT = new ReadIExpr(); :}
 		| VAR:v
 		{: RESULT = new VarExpr(v); :}
+;*/
+/*
+FunctionCall ::= 	StaticCall:c1
+					{: return c1; :}
+					| VirtualCall:c1
+					{: return c1; :}
 ;
+
+StaticCall ::= 	CLASS_ID:classid DOT ID:funcid LP ArgumentList:argslist RP
+			 	{: RESULT = new StaticFunctionCall(classid, functionid, argslist); :}
+;
+
+VirtualCall ::= expr:e1 DOT ID:funcid LP ArgumentList:argslist RP
+				{: RESULT = new VirtualFunctionCall(funcid, argslist, e1); :}
+				| ID:funcid LP ArgumentList:argslist RP
+				{: RESULT = new VirtualFunctionCall(funcid, argslist); :}
+;
+
+Location ::= 	ID:varID
+				{: RESULT = new ValueLocation(varID); :}
+				| expr:e1 DOT ID:varID
+				{: RESULT = new ValueLocation(e1, varID); :}
+				| expr:eId LB expr:eIndex RB
+				{: RESULT = new ArrayValueLocation(e1, e2); :}
+;
+
+Literal ::=		QUATE:sLiteral
+				{: RESULT = new StringLiteral(sLiteral); :}
+				| INTEGER:iLiteral
+				{: RESULT = new IntLiteral(iLiteral); :}
+				| TRUE
+				{: RESULT = new BoolLiteral(true); :}
+				| FALSE
+				{: RESULT = new BoolLiteral(false); :}
+				| NULL
+				{: RESULT = new NullLiteral(); :}
+;*/

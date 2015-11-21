@@ -108,13 +108,13 @@ non terminal Expr expr;
 non terminal Stmt stmt;
 non terminal StmtList stmt_list;
 
-non terminal FunctionCall;
-non terminal ArgumentList;
-non terminal NonEmptyArgumentList;
-non terminal StaticCall;
-non terminal VirtualCall;
-non terminal Location;
-non terminal Literal;
+non terminal FunctionCall FunctionCall;
+non terminal ArgumentList ArgumentList;
+non terminal ArgumentList NonEmptyArgumentList;
+non terminal StaticFunctionCall StaticCall;
+non terminal VirtualFunctionCall VirtualCall;
+non terminal ValueLocation Location;
+non terminal Literal Literal;
 
 precedence left LOR;
 precedence left LAND;
@@ -325,13 +325,13 @@ expr ::= expr:e1 PLUS:p expr:e2
 ;*/
 
 FunctionCall ::= 	StaticCall:c1
-					{: return c1; :}
+					{: RESULT = c1; :}
 					| VirtualCall:c1
-					{: return c1; :}
+					{: RESULT = c1; :}
 ;
 
 StaticCall ::= 	CLASS_ID:classid DOT ID:funcid LP ArgumentList:argslist RP
-			 	{: RESULT = new StaticFunctionCall(classid, functionid, argslist); :}
+			 	{: RESULT = new StaticFunctionCall(classid.toString(), funcid.toString(), argslist); :}
 ;
 
 VirtualCall ::= expr:e1 DOT ID:funcid LP ArgumentList:argslist RP
@@ -341,23 +341,23 @@ VirtualCall ::= expr:e1 DOT ID:funcid LP ArgumentList:argslist RP
 ;
 
 ArgumentList ::= 	NonEmptyArgumentList:l1
-					{: RESULT = new ArgumentList(l1); :}
+					{: RESULT = l1; :}
 					| 
-					{: RESULT = new ArgumentList(); :}
+					{: RESULT = null; :}
 ;
 
 NonEmptyArgumentList ::= expr:e1 COMMA ArgumentList:l1
-				{: RESULT = new ArgumentListNode(e1, l1); :}
+				{: RESULT = new ArgumentList(e1, l1); :}
 				| expr:e1
-				{: RESULT = new ArgumentListNode(e1); :}
+				{: RESULT = new ArgumentList(e1, null); :}
 ;
 
 Location ::= 	ID:varID
-				{: RESULT = new ValueLocation(varID); :}
+				{: RESULT = new VarValueLocation(varID.toString()); :}
 				| expr:e1 DOT ID:varID
-				{: RESULT = new ValueLocation(e1, varID); :}
+				{: RESULT = new VarValueLocation(e1, varID.toString()); :}
 				| expr:eId LB expr:eIndex RB
-				{: RESULT = new ArrayValueLocation(e1, e2); :}
+				{: RESULT = new ArrValueLocation(eId, eIndex); :}
 ;
 
 Literal ::=		QUOTE:sLiteral

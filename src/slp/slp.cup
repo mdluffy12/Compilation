@@ -91,18 +91,6 @@ terminal String		QUOTE;
 /*    NONTERMINALS    */
 /**********************/
 
-/*
-nonterminal Program program;
-nonterminal List<ICClass> class_list;
-nonterminal ICClass       ic_lng_class;
-nonterminal ClassMethod        method;
-nonterminal String  extends_opt;
-nonterminal List<ASTNode> fields_and_methods_list;
-
-nonterminal Type type;
-nonterminal List<ClassField> field_lst;
-*/
-
 non terminal Program program;
 non terminal List<ICClass> class_list;
 non terminal ICClass ic_class;
@@ -110,6 +98,11 @@ non terminal ClassParams class_param_lst;
 non terminal ClassMethod method;
 non terminal MethodFormal formal;
 non terminal Type type, method_type;
+
+non terminal List<ClassField> fields;
+non terminal List<String> more_fields;
+non terminal List<Formal> formal_lst, more_formals;
+
 
 non terminal Expr expr;
 non terminal Stmt stmt;
@@ -132,7 +125,7 @@ precedence left GT, LT, GTE, LTE;
 /**********************/
 /*   THE IC GRAMMER   */
 /**********************/
-/*
+
 program ::= class_list:lst
 	{:
 		RESULT = new Program(lst);
@@ -171,18 +164,18 @@ class_param_lst ::= class_param_lst:params method:m
 		params.fields.addAll(f);
 		RESULT = params; 
 	:}
-	| /* no fiels, no methods *//*
+	| /* no fiels, no methods */
 	{: 
 		RESULT = new ClassParams();
 	 :}
 ;
 
-fields ::=  type:t ID:field_name extra_fields:field_names_lst
+fields ::=  type:t ID:field_name more_fields:field_names_lst
 	{: 
 		field_names_lst.add(0, field_name.toString());
 		List<Field> fields_list = new ArrayList<Field>();
 		for (int i = 0; i < field_names_lst.size(); i++)
-			fields_list.add(new Field(t, field_names_lst.get(i))); 
+			fields_list.add(new ClassField(0,field_names_lst.get(i))); 
 		RESULT = fields_list; 
 	:}
 ;
@@ -198,27 +191,28 @@ more_fields ::= COMMA ID:field_name more_fields:field_names_lst
  			:}
  ;
  
- method ::= STATIC method_type:t ID:method_name LP formal_lst:f_lst RP LB stmnt_lst:s_lst RB 
+ method ::= STATIC method_type:t ID:method_name LP formal_lst:f_lst RP LB stmt_list:s_lst RB 
 			{: 
 				RESULT = new StaticMethod(t, method_name.toString(), f_lst, s_lst);
 			:}
-			| STATIC VOID:v ID:method_name LP formal_lst:f_lst RP LB stmnt_lst:s_lst RB 
+			| STATIC VOID:v ID:method_name LP formal_lst:f_lst RP LB stmt_list:s_lst RB 
 			{:
 				RESULT = new StaticMethod(new PrimitiveType(DataTypes.VOID), method_name.toString(), f_lst, s_lst);
 			:}
-			| method_type:t ID:method_name LP formal_lst:f_lst RP LB stmnt_lst:s_lst RB
+			| method_type:t ID:method_name LP formal_lst:f_lst RP LB stmt_list:s_lst RB
 			{: 
 				RESULT = new VirtualMethod(t, method_name.toString(), f_lst, s_lst);
 			:}
-			| VOID:v ID:method_name LP formal_lst:f_lst RP LB stmnt_lst:s_lst RB
+			| VOID:v ID:method_name LP formal_lst:f_lst RP LB stmt_list:s_lst RB
 			{: 
 				RESULT = new VirtualMethod(new PrimitiveType(DataTypes.VOID), method_name.toString(), f_lst, s_lst);
 			:}
 ; 
 
-formal_lst ::= formal:f extra_formals:extra_f 
+formal_lst ::= formal:f more_formals:m_formals 
 			{:
-				extra_f.add(0, f); RESULT = extra_f;
+				m_formals.add(0, f);
+				RESULT = m_formals;
 			:} 
 			| 
 			{:
@@ -226,9 +220,10 @@ formal_lst ::= formal:f extra_formals:extra_f
 			:}
 ;
 
-more_formals ::= COMMA formal:f more_formals:extra_f
+more_formals ::= COMMA formal:f more_formals:m_formals
 			{:
-				extra_f.add(0, f); RESULT = extra_f;
+				m_formals.add(0, f);
+				RESULT = m_formals;
 			:} 
 			| 
 			{:
@@ -238,7 +233,7 @@ more_formals ::= COMMA formal:f more_formals:extra_f
 
 formal ::= type:t ID:f_name
 		{:
-			RESULT = new ClassFormal(t, f_name.toString());
+			RESULT = new MethodFormal(t, f_name.toString());
 		:}
 ;
 
@@ -264,7 +259,7 @@ type ::= type:t LB RB
 			RESULT = new objectClassType(c.toString());
 		:}
 ;
-
+/*
 stmt_list ::= stmt:s
 	{: RESULT = new StmtList(s); :}
 	| stmt_list:sl stmt:s

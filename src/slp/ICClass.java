@@ -9,11 +9,6 @@ public class ICClass extends ASTNode
 	private List<ClassField> fields;
 	private List<ClassMethod> methods;
 
-	public void accept(Visitor visitor)
-	{
-		visitor.visit(this);
-	}
-
 	public ICClass(String name, List<ClassField> fields, List<ClassMethod> methods)
 	{
 		this.name = name;
@@ -25,6 +20,11 @@ public class ICClass extends ASTNode
 	{
 		this(name, fields, methods);
 		this.superClassName = superClassName;
+	}
+	
+	public void accept(Visitor visitor)
+	{
+		visitor.visit(this);
 	}
 
 	public String getName() 

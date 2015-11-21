@@ -106,6 +106,7 @@ non terminal List<Formal> formal_lst, more_formals;
 
 non terminal Expr expr;
 non terminal Stmt stmt;
+non terminal Stmt else_stmt;
 non terminal StmtList stmt_list;
 
 non terminal FunctionCall FunctionCall;
@@ -270,8 +271,29 @@ stmt ::= VAR:v ASSIGN expr:e SEMI
 	{: VarExpr ve = new VarExpr(v); RESULT = new AssignStmt(ve, e); :}
 	| PRINT LP expr:e RP SEMI
 	{: RESULT = new PrintStmt(e); :}
+	location:l ASSIGN expr:e SEMI
+	{: RESULT = new Location(1,expr); :} |
+	call:c SEMI
+	{: RESULT = new CallStatement(c); :}|
+	RETURN:ret_key exper:e SEMI
+	{: RESULT = new Return(ret_keyleft,e); :}|
+	IF LP expr:e RP stmt:doStmt else_stmt:eStmt
+	{: RESULT = new if(e,doStmt,eStmt); :}|
+	WHILE LP expr:e RP stmt:doStmt
+	{: RESULT = new While(e,doStmt); :}|
+	BREAK:break_key SEMI
+	{: RESULT = new Break(break_keyleft); :}|
+	CONTINUE:continue_key SEMI
+	{: RESULT = new Continue(continue_keyleft); :}|
+	LB:lb stmt_list:sl RB
+	{: RESULT = new stmtList(lbleft,sl); :}|
+	type:t ID:vName ASSIGN expr:e SEMI
+	{: RESULT = new LocalVariable(t,vName.toString(),e); :}|
+	type:t ID:vName SEMI
+	{: RESULT = new LocalVariable(t,vName.toString(),null); :}
 ;
 
+else_stmt :: = ELSE stmt:s {: RESULT = s ; :}| { RESULT = null; :};
 expr ::= expr:e1 PLUS:p expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.PLUS);
 		   System.out.println("Reduced rule e1 + e2 for e1=" + e1 + " and e2="+e2);

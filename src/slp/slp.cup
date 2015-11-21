@@ -259,7 +259,7 @@ type ::= type:t LB RB
 			RESULT = new objectClassType(c.toString());
 		:}
 ;
-/*
+
 stmt_list ::= stmt:s
 	{: RESULT = new StmtList(s); :}
 	| stmt_list:sl stmt:s
@@ -288,6 +288,10 @@ expr ::= expr:e1 PLUS:p expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.DIV);
 		   System.out.println("Reduced rule e1 / e2 for e1=" + e1 + " and e2="+e2);
 		 :}
+		| expr:e1 MOD expr:e2
+		{: RESULT = new BinaryOpExpr(e1, e2, Operator.MOD);
+		   System.out.println("Reduced rule e1 % e2 for e1=" + e1 + " and e2="+e2);
+		   :} 
 		| expr:e1 LAND expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.LAND);
 		   System.out.println("Reduced rule e1 && e2 for e1=" + e1 + " and e2="+e2);
@@ -312,8 +316,18 @@ expr ::= expr:e1 PLUS:p expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.GE);
 		   System.out.println("Reduced rule e1 >= e2 for e1=" + e1 + " and e2="+e2);
 		 :}
+		| expr:e1 EQUAL expr:e2
+		{: RESULT = new BinaryOpExpr(e1, e2, Operator.EQUAL);
+		   System.out.println("Reduced rule e1 == e2 for e1=" + e1 + " and e2="+e2);
+		   :}
+		| expr:e1 NEQUAL expr:e2
+		{: RESULT = new BinaryOpExpr(e1, e2, Operator.NEQUAL);
+		   System.out.println("Reduced rule e1 != e2 for e1=" + e1 + " and e2="+e2);
+		   :}
 		| MINUS expr:e1
 		{: RESULT = new UnaryOpExpr(e1, Operator.MINUS); :} 
+		| LNEG expr:e1
+		{: RESULT = new UnaryOpExpr(e1, Operator.LNEG); :}
 		| LP expr:e RP
 		{: RESULT = e; :}
 		| INTEGER:n
@@ -322,7 +336,22 @@ expr ::= expr:e1 PLUS:p expr:e2
 		{: RESULT = new ReadIExpr(); :}
 		| VAR:v
 		{: RESULT = new VarExpr(v); :}
-;*/
+		| THIS
+		{: RESULT =  new This(); :}
+		| NEW CLASS_ID:c1 LP RP
+		{: RESULT = new newClass(c1.toString()); :}
+		| NEW type:t1 LB expr:e1 RB
+		{: RESULT = new newArray(t1,e1); :}
+		| expr:e1 DOT LENGTH
+		{: RESULT = new ExprLength(e1); :}
+		| literal:l1
+		{: RESULT = l1; :}
+		| FunctionCall:c1
+		{: RESULT = c1; :}
+		| Location:l1
+		{: RESULT = l1; :}
+		
+;
 
 FunctionCall ::= 	StaticCall:c1
 					{: RESULT = c1; :}

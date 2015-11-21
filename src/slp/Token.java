@@ -7,7 +7,7 @@ import java_cup.runtime.Symbol;
 public class Token extends Symbol {
 	private final int line;
 	private final String name;
-
+	
 	public Token(int line, String name, int id, Object value) {
 		super(id, value);
 		this.name = name;

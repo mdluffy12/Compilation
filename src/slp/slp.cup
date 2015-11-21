@@ -1,5 +1,4 @@
 package slp;
-
 import java_cup.runtime.*;
 
 parser code  {:
@@ -19,17 +18,20 @@ parser code  {:
 		return lexer.getLineNumber();
 	}
 	
+	public String getText() {
+		return lexer.getText();
+	}
+	
 	public void syntax_error(Symbol s) {
-		Token tok = (Token) s;
-		System.out.println("Line " + tok.getLine()+": Syntax error; unexpected " + tok);
+		System.out.println("Line " + getLine()+": Syntax error; unexpected " + getText());
 	}
 :}
 
 // This is just for debugging
 scan with {:
-	Token t = lexer.next_token();
+	Symbol t = lexer.next_token();
 	if (printTokens)
-		System.out.println(t.getLine() + ":" + t);
+		System.out.println(getLine() + ":" + getText());
 	return t; 
 :};
 
@@ -114,6 +116,8 @@ non terminal Stmt stmt;
 non terminal StmtList stmt_list;
 
 non terminal FunctionCall;
+non terminal ArgumentList;
+non terminal NonEmptyArgumentList;
 non terminal StaticCall;
 non terminal VirtualCall;
 non terminal Location;
@@ -128,7 +132,7 @@ precedence left GT, LT, GTE, LTE;
 /**********************/
 /*   THE IC GRAMMER   */
 /**********************/
-
+/*
 program ::= class_list:lst
 	{:
 		RESULT = new Program(lst);
@@ -167,7 +171,7 @@ class_param_lst ::= class_param_lst:params method:m
 		params.fields.addAll(f);
 		RESULT = params; 
 	:}
-	| /* no fiels, no methods */
+	| /* no fiels, no methods *//*
 	{: 
 		RESULT = new ClassParams();
 	 :}
@@ -266,7 +270,7 @@ stmt_list ::= stmt:s
 	| stmt_list:sl stmt:s
 	{: sl.addStmt(s); RESULT = sl; :}
 ;
-/*
+
 stmt ::= VAR:v ASSIGN expr:e SEMI
 	{: VarExpr ve = new VarExpr(v); RESULT = new AssignStmt(ve, e); :}
 	| PRINT LP expr:e RP SEMI
@@ -324,7 +328,7 @@ expr ::= expr:e1 PLUS:p expr:e2
 		| VAR:v
 		{: RESULT = new VarExpr(v); :}
 ;*/
-/*
+
 FunctionCall ::= 	StaticCall:c1
 					{: return c1; :}
 					| VirtualCall:c1
@@ -341,6 +345,18 @@ VirtualCall ::= expr:e1 DOT ID:funcid LP ArgumentList:argslist RP
 				{: RESULT = new VirtualFunctionCall(funcid, argslist); :}
 ;
 
+ArgumentList ::= 	NonEmptyArgumentList:l1
+					{: RESULT = new ArgumentList(l1); :}
+					| 
+					{: RESULT = new ArgumentList(); :}
+;
+
+NonEmptyArgumentList ::= expr:e1 COMMA ArgumentList:l1
+				{: RESULT = new ArgumentListNode(e1, l1); :}
+				| expr:e1
+				{: RESULT = new ArgumentListNode(e1); :}
+;
+
 Location ::= 	ID:varID
 				{: RESULT = new ValueLocation(varID); :}
 				| expr:e1 DOT ID:varID
@@ -349,7 +365,7 @@ Location ::= 	ID:varID
 				{: RESULT = new ArrayValueLocation(e1, e2); :}
 ;
 
-Literal ::=		QUATE:sLiteral
+Literal ::=		QUOTE:sLiteral
 				{: RESULT = new StringLiteral(sLiteral); :}
 				| INTEGER:iLiteral
 				{: RESULT = new IntLiteral(iLiteral); :}
@@ -359,4 +375,4 @@ Literal ::=		QUATE:sLiteral
 				{: RESULT = new BoolLiteral(false); :}
 				| NULL
 				{: RESULT = new NullLiteral(); :}
-;*/
+; 

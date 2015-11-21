@@ -1,45 +1,20 @@
-/***************************/
-/* FILE NAME: LEX_FILE.lex */
-/***************************/
-
-/***************************/
-/* AUTHOR: OREN ISH SHALOM */
-/***************************/
-
-/*************/
-/* USER CODE */
-/*************/
-   
+package slp;
 import java_cup.runtime.*;
 
-/******************************/
-/* DOLAR DOLAR - DON'T TOUCH! */
-/******************************/
-      
 %%
-   
-/************************************/
-/* OPTIONS AND DECLARATIONS SECTION */
-/************************************/
-   
-/*****************************************************/ 
-/* Lexer is the name of the class JFlex will create. */
-/* The code will be written to the file Lexer.java.  */
-/*****************************************************/ 
-%class Lexer
 
-/********************************************************************/
-/* The current line number can be accessed with the variable yyline */
-/* and the current column number with the variable yycolumn.        */
-/********************************************************************/
-%line
-%column
-    
-/******************************************************************/
-/* CUP compatibility mode interfaces with a CUP generated parser. */
-/******************************************************************/
 %cup
-   
+%class Lexer
+%line
+%scanerror RuntimeException
+
+%{
+	public int getLineNumber() { return yyline+1; }
+%}
+
+%{
+	public String getText() { return yytext(); }
+%}   
 /****************/
 /* DECLARATIONS */
 /****************/
@@ -53,8 +28,8 @@ import java_cup.runtime.*;
     /*********************************************************************************/
     /* Create a new java_cup.runtime.Symbol with information about the current token */
     /*********************************************************************************/
-    private Symbol symbol(int type)               {return new Symbol(type, yyline, yycolumn);}
-    private Symbol symbol(int type, Object value) {return new Symbol(type, yyline, yycolumn, value);}
+    private Symbol token(int type)               {return new Symbol(type);}
+    private Symbol token(int type, Object value) {return new Symbol(type, value);}
 %}
 
 /***********************/
@@ -87,55 +62,52 @@ COMMENT_MULTI_LINE	= \/\* ([^\*] | \*[^\/])*\*? \*\/
    
 <YYINITIAL> {
   
-";"					{ System.out.print((yyline+1) + ": SEMI\n"); return symbol(sym.SEMI);}
-"+"					{ System.out.print((yyline+1) + ": PLUS\n");      return symbol(sym.PLUS);}
-"*"					{ System.out.print((yyline+1) + ": MULTIPLY\n");     return symbol(sym.MULTIPLY);}
-"/"					{ System.out.print((yyline+1) + ": DIVIDE\n");    return symbol(sym.DIVIDE);}
-"-"					{ System.out.print((yyline+1) + ": MINUS\n");    return symbol(sym.MINUS);}
-"("					{ System.out.print((yyline+1) + ": LP\n");    return symbol(sym.LP);}
-")"					{ System.out.print((yyline+1) + ": RP\n");    return symbol(sym.RP);}
-"="					{  System.out.print((yyline+1) + ": ASSIGN\n");   return symbol(sym.ASSIGN);}
-"boolean"			{  System.out.print((yyline+1) + ": BOOLEAN\n");   return symbol(sym.BOOLEAN);}
-"break"				{  System.out.print((yyline+1) + ": BREAK\n");   return symbol(sym.BREAK);}
-"class"				{  System.out.print((yyline+1) + ": CLASS\n");   return symbol(sym.CLASS);}
-","					{  System.out.print((yyline+1) + ": COMMA\n");   return symbol(sym.COMMA);}
-"continue"			{  System.out.print((yyline+1) + ": CONTINUE\n");   return symbol(sym.CONTINUE);}
-"\."				{  System.out.print((yyline+1) + ": DOT\n");   return symbol(sym.DOT);}
-"=="				{  System.out.print((yyline+1) + ": EQUAL\n");   return symbol(sym.EQUAL);}
-"extends"			{  System.out.print((yyline+1) + ": EXTENDS\n");   return symbol(sym.EXTENDS);}
-"else"				{  System.out.print((yyline+1) + ": ELSE\n");   return symbol(sym.ELSE);}
-"false"				{  System.out.print((yyline+1) + ": FALSE\n");   return symbol(sym.FALSE);}
-"true"				{  System.out.print((yyline+1) + ": TRUE\n");   return symbol(sym.TRUE);}
-">"					{  System.out.print((yyline+1) + ": GT\n");   return symbol(sym.GT);}
-">="				{  System.out.print((yyline+1) + ": GTE\n");   return symbol(sym.GTE);}
-"if"				{  System.out.print((yyline+1) + ": IF\n");   return symbol(sym.IF);}
-"int"				{  System.out.print((yyline+1) + ": INT\n");   return symbol(sym.INT);}
-"&&"				{  System.out.print((yyline+1) + ": LAND\n");   return symbol(sym.LAND);}
-"["					{  System.out.print((yyline+1) + ": LB\n");   return symbol(sym.LB);}
-"{"					{  System.out.print((yyline+1) + ": LCBR\n");   return symbol(sym.LCBR);}
-"length"			{  System.out.print((yyline+1) + ": LENGTH\n");   return symbol(sym.LENGTH);}
-"new"				{  System.out.print((yyline+1) + ": NEW\n");   return symbol(sym.NEW);}
-"!"					{  System.out.print((yyline+1) + ": LNEG\n");   return symbol(sym.LNEG);}
-"||"				{  System.out.print((yyline+1) + ": LOR\n");   return symbol(sym.LOR);}
-"<"					{  System.out.print((yyline+1) + ": LT\n");   return symbol(sym.LT);}
-"<="				{  System.out.print((yyline+1) + ": LTE\n");   return symbol(sym.LTE);}
-"%"					{  System.out.print((yyline+1) + ": MOD\n");   return symbol(sym.MOD);}
-"!="				{  System.out.print((yyline+1) + ": NEQUAL\n");   return symbol(sym.NEQUAL);}
-"null"				{  System.out.print((yyline+1) + ": NULL\n");   return symbol(sym.NULL);}
-"]"					{  System.out.print((yyline+1) + ": RB\n");   return symbol(sym.RB);}
-"}"					{  System.out.print((yyline+1) + ": RCBR\n");   return symbol(sym.RCBR);}
-"return"			{  System.out.print((yyline+1) + ": RETURN\n");   return symbol(sym.RETURN);}
-"static"			{  System.out.print((yyline+1) + ": STATIC\n");   return symbol(sym.STATIC);}
-"string"			{  System.out.print((yyline+1) + ": STRING\n");   return symbol(sym.STRING);}
-"this"				{  System.out.print((yyline+1) + ": THIS\n");   return symbol(sym.THIS);}
-"void"				{  System.out.print((yyline+1) + ": VOID\n");   return symbol(sym.VOID);}
-"while"				{  System.out.print((yyline+1) + ": WHILE\n");   return symbol(sym.WHILE);}
+";"					{ return token(sym.SEMI);}
+"+"					{ return token(sym.PLUS);}
+"*"					{ return token(sym.MULTIPLY);}
+"/"					{ return token(sym.DIVIDE);}
+"-"					{ return token(sym.MINUS);}
+"("					{ return token(sym.LP);}
+")"					{ return token(sym.RP);}
+"="					{  return token(sym.ASSIGN);}
+"boolean"			{  return token(sym.BOOLEAN);}
+"break"				{  return token(sym.BREAK);}
+"class"				{  return token(sym.CLASS);}
+","					{  return token(sym.COMMA);}
+"continue"			{  return token(sym.CONTINUE);}
+"\."				{  return token(sym.DOT);}
+"=="				{  return token(sym.EQUAL);}
+"extends"			{  return token(sym.EXTENDS);}
+"else"				{  return token(sym.ELSE);}
+"false"				{  return token(sym.FALSE);}
+"true"				{  return token(sym.TRUE);}
+">"					{  return token(sym.GT);}
+">="				{  return token(sym.GTE);}
+"if"				{  return token(sym.IF);}
+"int"				{  return token(sym.INT);}
+"&&"				{  return token(sym.LAND);}
+"["					{  return token(sym.LB);}
+"{"					{  return token(sym.LCBR);}
+"length"			{  return token(sym.LENGTH);}
+"new"				{  return token(sym.NEW);}
+"!"					{  return token(sym.LNEG);}
+"||"				{  return token(sym.LOR);}
+"<"					{  return token(sym.LT);}
+"<="				{  return token(sym.LTE);}
+"%"					{  return token(sym.MOD);}
+"!="				{  return token(sym.NEQUAL);}
+"null"				{  return token(sym.NULL);}
+"]"					{  return token(sym.RB);}
+"}"					{  return token(sym.RCBR);}
+"return"			{  return token(sym.RETURN);}
+"static"			{  return token(sym.STATIC);}
+"string"			{  return token(sym.STRING);}
+"this"				{  return token(sym.THIS);}
+"void"				{  return token(sym.VOID);}
+"while"				{  return token(sym.WHILE);}
 
 {QUOTE}				{
-						System.out.print((yyline+1) + ": QUOTE(");
-						System.out.print(yytext());
-						System.out.print(")\n");
-						return symbol(sym.QUOTE, new String(yytext()));
+						return token(sym.QUOTE, new String(yytext()));
 					}
 {COMMENT_ONE_LINE}	{
 					}
@@ -143,27 +115,19 @@ COMMENT_MULTI_LINE	= \/\* ([^\*] | \*[^\/])*\*? \*\/
 					}	
  
 {CLASS_ID}			{
-						System.out.print((yyline+1) + ": CLASS_ID(");
-						System.out.print(yytext());
-						System.out.print(")\n");
-						return symbol(sym.CLASS_ID, new String(yytext()));
+						return token(sym.CLASS_ID, new String(yytext()));
 					}
 					
 					
 {NUMBER}			{
-						System.out.print((yyline+1) + ": INTEGER(");
-						System.out.print(yytext());
-						System.out.print(")\n");
-						return symbol(sym.INTEGER, new Integer(yytext()));
+						return token(sym.INTEGER, new Integer(yytext()));
 					}   
 {IDENTIFIER}		{
-						System.out.print((yyline+1) + ": ID(");
-						System.out.print(yytext());
-						System.out.print(")\n");
-						return symbol(sym.ID, new String(yytext()));
+						return token(sym.ID, new String(yytext()));
 					}
 {WhiteSpace}		{ /* just skip what was found, do nothing */ }   
 
-<<EOF>> 			{ System.out.print((yyline+1) + ": EOF"); return symbol(0);}
- .					{ System.out.print("Error in line " + (yyline+1) + " Invalid character " + yytext()); System.exit(1); }
+ . 					{ throw new RuntimeException("Illegal character at line " + (yyline+1) + " : '" + yytext() + "'"); }
+
+<<EOF>> 			{ return new Token(yyline+1, "EOF", sym.EOF);}
 }

@@ -1,7 +1,7 @@
 package src.slp;
 
 public class Location extends Expr {
-
+	public Location(){}
 	@Override
 	public void accept(Visitor visitor) {
 		this.accept(visitor);

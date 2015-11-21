@@ -175,7 +175,7 @@ fields ::=  type:t ID:field_name more_fields:field_names_lst
 		field_names_lst.add(0, field_name.toString());
 		List<Field> fields_list = new ArrayList<Field>();
 		for (int i = 0; i < field_names_lst.size(); i++)
-			fields_list.add(new ClassField(0,field_names_lst.get(i))); 
+			fields_list.add(new ClassField(t,field_names_lst.get(i))); 
 		RESULT = fields_list; 
 	:}
 ;

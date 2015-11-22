@@ -126,7 +126,7 @@ precedence left GT, LT, GTE, LTE;
 /**********************/
 /*   THE IC GRAMMER   */
 /**********************/
-
+/*
 program ::= class_list:lst
 	{:
 		RESULT = new Program(lst);
@@ -165,7 +165,7 @@ class_param_lst ::= class_param_lst:params method:m
 		params.fields.addAll(f);
 		RESULT = params; 
 	:}
-	| /* no fiels, no methods */
+	| /* no fiels, no methods *//*
 	{: 
 		RESULT = new ClassParams();
 	 :}
@@ -260,7 +260,8 @@ type ::= type:t LB RB
 			RESULT = new objectClassType(c.toString());
 		:}
 ;
-
+*/
+/*
 stmt_list ::= stmt:s
 	{: RESULT = new StmtList(s); :}
 	| stmt_list:sl stmt:s
@@ -293,7 +294,7 @@ stmt ::= VAR:v ASSIGN expr:e SEMI
 	{: RESULT = new LocalVariable(t,vName.toString(),null); :}
 ;
 
-else_stmt :: = ELSE stmt:s {: RESULT = s ; :}| { RESULT = null; :};
+else_stmt :: = ELSE stmt:s {: RESULT = s ; :}| { RESULT = null; :};*/
 expr ::= expr:e1 PLUS:p expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.PLUS);
 		   System.out.println("Reduced rule e1 + e2 for e1=" + e1 + " and e2="+e2);
@@ -354,10 +355,6 @@ expr ::= expr:e1 PLUS:p expr:e2
 		{: RESULT = e; :}
 		| INTEGER:n
 		{: RESULT = new NumberExpr(n.intValue()); :}
-		| READI LP RP
-		{: RESULT = new ReadIExpr(); :}
-		| VAR:v
-		{: RESULT = new VarExpr(v); :}
 		| THIS
 		{: RESULT =  new This(); :}
 		| NEW CLASS_ID:c1 LP RP
@@ -366,7 +363,7 @@ expr ::= expr:e1 PLUS:p expr:e2
 		{: RESULT = new newArray(t1,e1); :}
 		| expr:e1 DOT LENGTH
 		{: RESULT = new ExprLength(e1); :}
-		| literal:l1
+		| Literal:l1
 		{: RESULT = l1; :}
 		| FunctionCall:c1
 		{: RESULT = c1; :}

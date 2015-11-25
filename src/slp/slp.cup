@@ -268,12 +268,8 @@ stmt_list ::= stmt:s
 	{: sl.addStmt(s); RESULT = sl; :}
 ;
 
-stmt ::= VAR:v ASSIGN expr:e SEMI
-	{: VarExpr ve = new VarExpr(v); RESULT = new AssignStmt(ve, e); :}
-	| PRINT LP expr:e RP SEMI
-	{: RESULT = new PrintStmt(e); :}
-	location:l ASSIGN expr:e SEMI
-	{: RESULT = new Location(1,expr); :} |
+stmt ::= location:l ASSIGN expr:e SEMI
+	{: RESULT = new Location(l,e); :} |
 	call:c SEMI
 	{: RESULT = new CallStatement(c); :}|
 	RETURN:ret_key exper:e SEMI

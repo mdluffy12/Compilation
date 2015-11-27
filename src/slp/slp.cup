@@ -1,5 +1,7 @@
 package slp;
 import java_cup.runtime.*;
+import java.util.ArrayList;
+import java.util.List;
 
 parser code  {:
 	/** Causes the parsr to print every token it reads.
@@ -81,6 +83,7 @@ terminal STRING;
 terminal THIS;
 terminal VOID;
 terminal WHILE;
+terminal UMINUS;
 
 terminal Integer	INTEGER;
 terminal String		ID;
@@ -97,11 +100,11 @@ non terminal ICClass ic_class;
 non terminal ClassParams class_param_lst;
 non terminal ClassMethod method;
 non terminal MethodFormal formal;
-non terminal Type type, method_type;
+non terminal Type type;
 
 non terminal List<ClassField> fields;
 non terminal List<String> more_fields;
-non terminal List<Formal> formal_lst, more_formals;
+non terminal List<MethodFormal> formal_lst, more_formals;
 
 
 non terminal Expr expr;
@@ -121,12 +124,13 @@ precedence left LOR;
 precedence left LAND;
 precedence left PLUS, MINUS;
 precedence left DIVIDE, MULTIPLY;
+precedence left UMINUS;
 precedence left GT, LT, GTE, LTE;
 
 /**********************/
 /*   THE IC GRAMMER   */
 /**********************/
-/*
+
 program ::= class_list:lst
 	{:
 		RESULT = new Program(lst);
@@ -141,31 +145,31 @@ class_list ::= class_list:lst ic_class:c
   	| ic_class:c
   	{: 
   		RESULT = new ArrayList<ICClass>();
-  		RESULT.add(c)
+  		RESULT.add(c);
   	 :}
  ;
 
 ic_class ::= CLASS:class_key CLASS_ID:name EXTENDS CLASS_ID:extended_class_name LCBR class_param_lst:params RCBR
 	{:
-		RESULT = new ICClass(name.toString(), extended_class_name.toString(), params.fields, params.methods);
+		RESULT = new ICClass(name.toString(), extended_class_name.toString(), params.members);
 	:} 
 	| CLASS:class_key CLASS_ID:name LCBR class_param_lst:params RCBR
 	{: 
-		RESULT = new ICClass(name.toString(), null, params.fields, params.methods);
+		RESULT = new ICClass(name.toString(), null, params.members);
 	:}
 ;
 
 class_param_lst ::= class_param_lst:params method:m
 	{: 
-		params.methods.add(m);
+		params.members.add(m);
 		RESULT = params; 
 	:}
 	| class_param_lst:params fields:f
 	{: 
-		params.fields.addAll(f);
+		params.members.addAll(f);
 		RESULT = params; 
 	:}
-	| /* no fiels, no methods *//*
+	| /* no fiels, no methods */
 	{: 
 		RESULT = new ClassParams();
 	 :}
@@ -174,7 +178,7 @@ class_param_lst ::= class_param_lst:params method:m
 fields ::=  type:t ID:field_name more_fields:field_names_lst
 	{: 
 		field_names_lst.add(0, field_name.toString());
-		List<Field> fields_list = new ArrayList<Field>();
+		List<ClassField> fields_list = new ArrayList<ClassField>();
 		for (int i = 0; i < field_names_lst.size(); i++)
 			fields_list.add(new ClassField(t,field_names_lst.get(i))); 
 		RESULT = fields_list; 
@@ -192,19 +196,19 @@ more_fields ::= COMMA ID:field_name more_fields:field_names_lst
  			:}
  ;
  
- method ::= STATIC method_type:t ID:method_name LP formal_lst:f_lst RP LB stmt_list:s_lst RB 
+ method ::= STATIC type:t ID:method_name LP formal_lst:f_lst RP LCBR stmt_list:s_lst RCBR
 			{: 
 				RESULT = new StaticMethod(t, method_name.toString(), f_lst, s_lst);
 			:}
-			| STATIC VOID:v ID:method_name LP formal_lst:f_lst RP LB stmt_list:s_lst RB 
+			| STATIC VOID:v ID:method_name LP formal_lst:f_lst RP LCBR stmt_list:s_lst RCBR 
 			{:
 				RESULT = new StaticMethod(new PrimitiveType(DataTypes.VOID), method_name.toString(), f_lst, s_lst);
 			:}
-			| method_type:t ID:method_name LP formal_lst:f_lst RP LB stmt_list:s_lst RB
+			| type:t ID:method_name LP formal_lst:f_lst RP LCBR stmt_list:s_lst RCBR
 			{: 
 				RESULT = new VirtualMethod(t, method_name.toString(), f_lst, s_lst);
 			:}
-			| VOID:v ID:method_name LP formal_lst:f_lst RP LB stmt_list:s_lst RB
+			| VOID:v ID:method_name LP formal_lst:f_lst RP LCBR stmt_list:s_lst RCBR
 			{: 
 				RESULT = new VirtualMethod(new PrimitiveType(DataTypes.VOID), method_name.toString(), f_lst, s_lst);
 			:}
@@ -217,7 +221,7 @@ formal_lst ::= formal:f more_formals:m_formals
 			:} 
 			| 
 			{:
-				RESULT = new ArrayList<Formal>();
+				RESULT = new ArrayList<MethodFormal>();
 			:}
 ;
 
@@ -228,7 +232,7 @@ more_formals ::= COMMA formal:f more_formals:m_formals
 			:} 
 			| 
 			{:
-				RESULT = new ArrayList<Formal>();
+				RESULT = new ArrayList<MethodFormal>();
 			:}
 ;
 
@@ -251,106 +255,97 @@ type ::= type:t LB RB
 		{:
 			RESULT = new PrimitiveType(DataTypes.BOOLEAN);
 		:}
-		| QUOTE:s
+		| STRING:s
 		{:
 			RESULT = new PrimitiveType(DataTypes.STRING);
 		:}
 		| CLASS_ID:c
 		{:
-			RESULT = new objectClassType(c.toString());
+			RESULT = new ObjectClassType(c.toString());
 		:}
 ;
-*/
-/*
+
+
 stmt_list ::= stmt:s
 	{: RESULT = new StmtList(s); :}
 	| stmt_list:sl stmt:s
 	{: sl.addStmt(s); RESULT = sl; :}
 ;
 
-stmt ::= location:l ASSIGN expr:e SEMI
-	{: RESULT = new Location(l,e); :} |
-	call:c SEMI
-	{: RESULT = new CallStatement(c); :}|
-	RETURN:ret_key exper:e SEMI
-	{: RESULT = new Return(ret_keyleft,e); :}|
+stmt ::= Location:l ASSIGN expr:e SEMI
+	{: RESULT = new AssignStmt(l,e); :} |
+	FunctionCall:c SEMI
+	{: RESULT = new CallStmt(c); :}|
+	RETURN expr:e SEMI
+	{: RESULT = new Return(e); :}|
+	RETURN SEMI
+	{: RESULT = new Return(null); :}|
 	IF LP expr:e RP stmt:doStmt else_stmt:eStmt
-	{: RESULT = new if(e,doStmt,eStmt); :}|
+	{: RESULT = new If(e,doStmt,eStmt); :}|
 	WHILE LP expr:e RP stmt:doStmt
 	{: RESULT = new While(e,doStmt); :}|
-	BREAK:break_key SEMI
-	{: RESULT = new Break(break_keyleft); :}|
-	CONTINUE:continue_key SEMI
-	{: RESULT = new Continue(continue_keyleft); :}|
-	LB:lb stmt_list:sl RB
-	{: RESULT = new stmtList(lbleft,sl); :}|
+	BREAK SEMI
+	{: RESULT = new Break(); :}|
+	CONTINUE SEMI
+	{: RESULT = new Continue(); :}|
+	LCBR stmt_list:sl RCBR
+	{: RESULT = new BlockStmt(sl); :}|
 	type:t ID:vName ASSIGN expr:e SEMI
-	{: RESULT = new LocalVariable(t,vName.toString(),e); :}|
+	{: RESULT = new LocalVar(t,vName.toString(),e); :}|
 	type:t ID:vName SEMI
-	{: RESULT = new LocalVariable(t,vName.toString(),null); :}
+	{: RESULT = new LocalVar(t,vName.toString()); :}
 ;
 
-else_stmt :: = ELSE stmt:s {: RESULT = s ; :}| { RESULT = null; :};*/
+else_stmt ::= ELSE stmt:s
+			{: RESULT = s ; :}
+			|
+			{: RESULT = null; :}
+;
 expr ::= expr:e1 PLUS:p expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.PLUS);
-		   System.out.println("Reduced rule e1 + e2 for e1=" + e1 + " and e2="+e2);
 		 :}
 		| expr:e1 MINUS expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.MINUS);
-		   System.out.println("Reduced rule e1 - e2 for e1=" + e1 + " and e2="+e2);
 		 :}
 		| expr:e1 MULTIPLY expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.MULT);
-		   System.out.println("Reduced rule e1 * e2 for e1=" + e1 + " and e2="+e2);
 		 :}
 		| expr:e1 DIVIDE expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.DIV);
-		   System.out.println("Reduced rule e1 / e2 for e1=" + e1 + " and e2="+e2);
 		 :}
 		| expr:e1 MOD expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.MOD);
-		   System.out.println("Reduced rule e1 % e2 for e1=" + e1 + " and e2="+e2);
 		   :} 
 		| expr:e1 LAND expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.LAND);
-		   System.out.println("Reduced rule e1 && e2 for e1=" + e1 + " and e2="+e2);
 		 :}
 		| expr:e1 LOR expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.LOR);
-		   System.out.println("Reduced rule e1 || e2 for e1=" + e1 + " and e2="+e2);
 		 :}
 		| expr:e1 LT expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.LT);
-		   System.out.println("Reduced rule e1 < e2 for e1=" + e1 + " and e2="+e2);
 		 :}
 		| expr:e1 GT expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.GT);
-		   System.out.println("Reduced rule e1 > e2 for e1=" + e1 + " and e2="+e2);
 		 :}
 		| expr:e1 LTE expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.LE);
-		   System.out.println("Reduced rule e1 <= e2 for e1=" + e1 + " and e2="+e2);
 		 :}
 		| expr:e1 GTE expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.GE);
-		   System.out.println("Reduced rule e1 >= e2 for e1=" + e1 + " and e2="+e2);
 		 :}
 		| expr:e1 EQUAL expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.EQUAL);
-		   System.out.println("Reduced rule e1 == e2 for e1=" + e1 + " and e2="+e2);
 		   :}
 		| expr:e1 NEQUAL expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.NEQUAL);
-		   System.out.println("Reduced rule e1 != e2 for e1=" + e1 + " and e2="+e2);
 		   :}
 		| MINUS expr:e1
-		{: RESULT = new UnaryOpExpr(e1, Operator.MINUS); :} 
+		{: RESULT = new UnaryOpExpr(e1, Operator.MINUS); :} %prec UMINUS
 		| LNEG expr:e1
 		{: RESULT = new UnaryOpExpr(e1, Operator.LNEG); :}
 		| LP expr:e RP
 		{: RESULT = e; :}
-		| INTEGER:n
-		{: RESULT = new NumberExpr(n.intValue()); :}
 		| THIS
 		{: RESULT =  new This(); :}
 		| NEW CLASS_ID:c1 LP RP

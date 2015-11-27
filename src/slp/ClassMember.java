@@ -1,16 +1,17 @@
 package slp;
 
-/** An AST node for readi() expressions.
- *
+/**
+ * Class ClassField <= ASTNode.
  */
-public class ReadIExpr extends Expr {
-	/** Accepts a visitor object as part of the visitor pattern.
-	 * @param visitor A visitor.
-	 */
-	@Override
+public class ClassMember extends ASTNode {
+
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
+	
+	public ClassMember() {
+	}
+
 	
 	/** Accepts a propagating visitor parameterized by two types.
 	 * 
@@ -26,7 +27,4 @@ public class ReadIExpr extends Expr {
 		return visitor.visit(this, context);
 	}	
 
-	public String toString() {
-		return "readi()";
-	}	
 }

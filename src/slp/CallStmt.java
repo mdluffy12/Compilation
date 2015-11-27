@@ -1,15 +1,23 @@
-package src.slp;
+package slp;
 
 public class CallStmt extends Stmt {
-	private Call call;
-	public CallStmt(Call c){
+	private FunctionCall call;
+	public CallStmt(FunctionCall c){
 		this.call=c;
 	}
-	public Call getCall(){
+	public FunctionCall getCall(){
 		return call;
 	}
+
+
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+	}
+	
 	@Override
 	public <DownType, UpType> UpType accept(PropagatingVisitor<DownType, UpType> visitor, DownType context) {
+		// TODO Auto-generated method stub
 		return visitor.visit(this, context);
 	}
 

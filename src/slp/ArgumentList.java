@@ -14,7 +14,7 @@ public class ArgumentList extends ASTNode {
 	@Override
 	public void accept(Visitor visitor) {
 		// TODO Auto-generated method stub
-
+		visitor.visit(this);
 	}
 
 	@Override

@@ -6,19 +6,17 @@ public class ICClass extends ASTNode
 {
 	private String name;
 	private String superClassName = null;
-	private List<ClassField> fields;
-	private List<ClassMethod> methods;
+	private List<ClassMember> members;
 
-	public ICClass(String name, List<ClassField> fields, List<ClassMethod> methods)
+	public ICClass(String name, List<ClassMember> members)
 	{
 		this.name = name;
-		this.fields = fields;
-		this.methods = methods;
+		this.members = members;
 	}
 
-	public ICClass(String name, String superClassName, List<ClassField> fields, List<ClassMethod> methods)
+	public ICClass(String name, String superClassName, List<ClassMember> members)
 	{
-		this(name, fields, methods);
+		this(name, members);
 		this.superClassName = superClassName;
 	}
 	
@@ -42,14 +40,9 @@ public class ICClass extends ASTNode
 		return superClassName;
 	}
 
-	public List<ClassField> getFields()
+	public List<ClassMember> getMembers()
 	{
-		return fields;
-	}
-
-	public List<ClassMethod> getMethods()
-	{
-		return methods;
+		return members;
 	}
 	
 	/** Accepts a propagating visitor parameterized by two types.

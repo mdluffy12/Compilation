@@ -1,10 +1,11 @@
 package slp;
 
-public class StringLiteral extends Literal {
-	public String value;
-	public StringLiteral(String value)
+public class BlockStmt extends Stmt {
+
+	public StmtList m_stmtList;
+	public BlockStmt(StmtList stmtList)
 	{
-		this.value = value;
+		m_stmtList = stmtList;
 	}
 	
 	@Override
@@ -17,4 +18,5 @@ public class StringLiteral extends Literal {
 			PropagatingVisitor<DownType, UpType> visitor, DownType context) {
 		return visitor.visit(this, context);
 	}	
+
 }

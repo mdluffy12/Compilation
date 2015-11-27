@@ -2,14 +2,14 @@ package slp;
 
 import java.util.List;
 
-public abstract class ClassMethod extends ASTNode {
+public abstract class ClassMethod extends ClassMember {
 
 	protected Type type;
 	protected String name;
 	protected List<MethodFormal> formals;
-	protected List<Stmt> statements;
+	protected StmtList statements;
 
-	protected ClassMethod(Type type, String name, List<MethodFormal> formals, List<Stmt> statements)
+	protected ClassMethod(Type type, String name, List<MethodFormal> formals, StmtList statements)
 	{
 		this.type = type;
 		this.name = name;
@@ -32,7 +32,7 @@ public abstract class ClassMethod extends ASTNode {
 		return formals;
 	}
 
-	public List<Stmt> getStatements() 
+	public StmtList getStatements() 
 	{
 		return statements;
 	}

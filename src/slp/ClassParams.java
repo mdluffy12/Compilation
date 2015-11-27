@@ -5,12 +5,10 @@ import java.util.List;
 
 public class ClassParams 
 {
-	public List<ClassField> fields;
-	public List<ClassMethod> methods;
+	public List<ClassMember> members;
 	
 	public ClassParams()
 	{
-		fields = new ArrayList<ClassField>();
-		methods = new ArrayList<ClassMethod>();
+		members = new ArrayList<ClassMember>();
 	}
 }

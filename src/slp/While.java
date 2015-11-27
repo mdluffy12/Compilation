@@ -1,4 +1,4 @@
-package src.slp;
+package slp;
 
 public class While extends Stmt {
 	private Expr cond;
@@ -13,7 +13,12 @@ public class While extends Stmt {
 	public Stmt getOperation(){
 		return op;
 	}
-	
+
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+
+	}
 	
 	@Override
 	public <DownType, UpType> UpType accept(PropagatingVisitor<DownType, UpType> visitor, DownType context) {

@@ -1,4 +1,4 @@
-tokpackage slp;
+package slp;
 
 import java.io.IOException;
 

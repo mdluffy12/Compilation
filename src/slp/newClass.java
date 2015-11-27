@@ -1,4 +1,4 @@
-package src.slp;
+package slp;
 
 public class newClass extends Expr {
 	public String classID;
@@ -9,7 +9,6 @@ public class newClass extends Expr {
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
-
 	}
 	@Override
 	public <DownType, UpType> UpType accept(

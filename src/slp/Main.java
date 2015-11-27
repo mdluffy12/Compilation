@@ -38,15 +38,16 @@ public class Main {
 			
 			Symbol parseSymbol = parser.parse();
 			System.out.println("Parsed " + args[0] + " successfully!");
-			StmtList root = (StmtList) parseSymbol.value;
+			ASTNode root = (ASTNode) parseSymbol.value;
 			
 			// Pretty-print the program to System.out
 			PrettyPrinter printer = new PrettyPrinter(root);
 			printer.print();
 			
+			System.out.println("Finished Printing the AST!!");
 			// Interpret the program
-			SLPEvaluator evaluator = new SLPEvaluator(root);
-			evaluator.evaluate();
+			//SLPEvaluator evaluator = new SLPEvaluator(root);
+			//evaluator.evaluate();
 		} catch (Exception e) {
 			System.out.print(e);
 		}

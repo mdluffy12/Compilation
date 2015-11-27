@@ -2,15 +2,15 @@ package slp;
 
 /** An AST node for program variables.
  */
-public class TypeVar extends Expr {
+public class LocalVar extends Stmt {
 	public  String name;
 	private Type t;
 	private Expr initValue = null;
-	public TypeVar(Type t,String name){
+	public LocalVar(Type t,String name){
 		this.t  = t;
 		this.name=name;
 	}
-	public TypeVar(Type t,String name, Expr initValue){
+	public LocalVar(Type t,String name, Expr initValue){
 		this(t,name);
 		this.initValue=initValue;
 	}
@@ -28,7 +28,7 @@ public class TypeVar extends Expr {
 	}
 	@Override
 	public void accept(Visitor visitor) {
-		this.accept(visitor);
+		visitor.visit(this);
 		
 	}
 

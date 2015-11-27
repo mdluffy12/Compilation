@@ -1,4 +1,4 @@
-package src.slp;
+package slp;
 
 public class newArray extends Expr{
 	public final Type type;

@@ -8,7 +8,7 @@ public class VirtualMethod extends ClassMethod {
 		visitor.visit(this);
 	}
 
-	public VirtualMethod(Type type, String name, List<MethodFormal> formals, List<Stmt> statements) 
+	public VirtualMethod(Type type, String name, List<MethodFormal> formals, StmtList statements) 
 	{
 		super(type, name, formals, statements);
 	}

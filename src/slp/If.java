@@ -1,4 +1,4 @@
-package src.slp;
+package slp;
 
 public class If extends Stmt{
 	private Expr cond;
@@ -25,8 +25,16 @@ public class If extends Stmt{
 	public boolean hasElse(){
 		return (elseOp!=null);
 	}
+
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+
+	}
+	
 	@Override
 	public <DownType, UpType> UpType accept(PropagatingVisitor<DownType, UpType> visitor, DownType context) {
+		// TODO Auto-generated method stub
 		return visitor.visit(this, context);
 	}
 	

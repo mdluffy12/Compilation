@@ -3,7 +3,7 @@ package slp;
 /**
  * Class ClassField <= ASTNode.
  */
-public class ClassField extends ASTNode {
+public class ClassField extends ClassMember {
 
 	private Type fieldType;
 	private String fieldName;

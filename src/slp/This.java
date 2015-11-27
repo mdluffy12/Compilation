@@ -1,4 +1,4 @@
-package src.slp;
+package slp;
 
 public class This extends Expr {
 	public This()

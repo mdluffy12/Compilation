@@ -292,7 +292,7 @@ stmt ::= Location:l ASSIGN expr:e SEMI
 	{: RESULT = new BlockStmt(sl); :}|
 	type:t ID:vName ASSIGN expr:e SEMI
 	{: RESULT = new LocalVar(t,vName.toString(),e); :}|
-	type:t ID:vName SEMI
+	type:t ID:vName SEMI 
 	{: RESULT = new LocalVar(t,vName.toString()); :}
 ;
 

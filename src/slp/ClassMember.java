@@ -4,14 +4,10 @@ package slp;
  * Class ClassField <= ASTNode.
  */
 public class ClassMember extends ASTNode {
-
+	
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
-	
-	public ClassMember() {
-	}
-
 	
 	/** Accepts a propagating visitor parameterized by two types.
 	 * 
@@ -25,6 +21,5 @@ public class ClassMember extends ASTNode {
 	public <DownType, UpType> UpType accept(
 			PropagatingVisitor<DownType, UpType> visitor, DownType context) {
 		return visitor.visit(this, context);
-	}	
-
+	}
 }

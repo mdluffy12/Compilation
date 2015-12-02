@@ -91,12 +91,13 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, Integer> {
 		return new Integer(- value.intValue());
 	}
 
-	public Integer visit(BinaryOpExpr expr, Environment env) {
-		Integer lhsValue = expr.lhs.accept(this, env);
+	public Type visit(BinaryOpExpr expr, Environment env) {
+		Type lhsValue = expr.lhs.accept(this, env);
 		int lhsInt = lhsValue.intValue();
-		Integer rhsValue = expr.rhs.accept(this, env);
+		 rhsValue = expr.rhs.accept(this, env);
 		int rhsInt = rhsValue.intValue();
 		int result;
+		return new PrimitivType(datatp.integer);
 		switch (expr.op) {
 		case DIV:
 			if (rhsInt == 0)

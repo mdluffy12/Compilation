@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="**/*.cup|**/*.lex" kind="src" path=""/>
+	<classpathentry kind="var" path="CUP_RUNTIME_JAR"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

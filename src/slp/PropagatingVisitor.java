@@ -20,6 +20,8 @@ public interface PropagatingVisitor<DownType,UpType> {
 	public UpType visit(VirtualMethod method, DownType d);
 	public UpType visit(PrimitiveType ptype, DownType d);
 	public UpType visit(ObjectClassType octype, DownType d);
+	public UpType visit(newArray arr, DownType d);
+	
 	
 	
 

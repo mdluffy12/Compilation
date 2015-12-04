@@ -5,7 +5,6 @@ package slp;
 public interface Visitor {
 	public void visit(StmtList stmts);
 	public void visit(LocalVar stmt);
-	public void visit(PrintStmt stmt);
 	public void visit(AssignStmt stmt);
 	public void visit(BlockStmt stmt);
 	public void visit(While stmt);

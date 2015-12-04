@@ -48,6 +48,13 @@ public class Main {
 			// Interpret the program
 			//SLPEvaluator evaluator = new SLPEvaluator(root);
 			//evaluator.evaluate();
+			
+			symbolTypes.TypeTableMgr typeMgr = new symbolTypes.TypeTableMgr();
+			typeMgr.create((Program)root);
+			
+			//call the symbolTable builder and make SLPEvaluetor work....
+			
+			
 		} catch (Exception e) {
 			System.out.print(e);
 		}

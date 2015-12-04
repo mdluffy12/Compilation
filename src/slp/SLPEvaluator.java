@@ -2,6 +2,18 @@ package slp;
 
 import java.io.IOException;
 
+import IC.AST.Break;
+import IC.AST.Continue;
+import IC.AST.Expression;
+import IC.AST.Formal;
+import IC.AST.If;
+import IC.AST.Method;
+import IC.AST.Statement;
+import IC.AST.While;
+import IC.Symbol.Kind;
+import IC.Symbol.Symbol;
+import IC.Symbol.SymbolTable;
+import IC.Symbol.SymbolTableType;
 import symbolTypes.*;
 import slp.ClassField;
 import slp.Environment;
@@ -18,6 +30,8 @@ import slp.VirtualMethod;
 public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes.SymbolType> 
 {
 	protected ASTNode root;
+	protected TypeTable type_t;
+	protected SymbolTable table;
 
 	/** Constructs an SLP interpreter for the given AST.
 	 * 
@@ -34,33 +48,40 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 		root.accept(this, env);
 	}
 	
-	public Integer visit(StmtList stmts, Environment env) {
-		for (Stmt st : stmts.statements) {
+	public SymbolType visit(StmtList stmts, Environment env) 
+	{
+		for (Stmt st : stmts.statements) 
+		{
 			st.accept(this, env);
 		}
 		return null;
 	}
 
-	public Integer visit(Stmt stmt, Environment env) {
-		throw new UnsupportedOperationException("Unexpected visit of Stmt!");
+	public SymbolType visit(Stmt stmt, Environment env) 
+	{
+		throw new RuntimeException("Unexpected visit of Stmt!");
 	}
 
-	public Integer visit(PrintStmt stmt, Environment env) {
-		Integer printValue = stmt.expr.accept(this, env);
-		System.out.println(printValue);
-		return null;
+	public SymbolType visit(AssignStmt stmt, Environment env) 
+	{
+		SymbolType type1 = stmt.varExpr.accept(this, env);
+		SymbolType type2 = stmt.rhs.accept(this, env);
+		
+		if (type1 == null || type2 == null) 
+		{
+			throw new RuntimeException(stmt.getLine()+
+					": can not perform assignment from type void, or to type void.");
+		}
+		
+		if(!type1.compareType(type2))
+		{
+			throw new RuntimeException(stmt.getLine()+
+					": can not perform assignment from type "+type2.toString() +" to type "+type1.toString());
+		}
 	}
 
-	public Integer visit(AssignStmt stmt, Environment env) {
-		Expr rhs = stmt.rhs;
-		Integer expressionValue = rhs.accept(this, env);
-		VarExpr var = stmt.varExpr;
-		env.update(var, expressionValue);
-		return null;
-	}
-
-	public Integer visit(Expr expr, Environment env) {
-		throw new UnsupportedOperationException("Unexpected visit of Expr!");
+	public SymbolType visit(Expr expr, Environment env) {
+		throw new RuntimeException("Unexpected visit of Expr!");
 	}
 
 	public Integer visit(ReadIExpr expr, Environment env) {
@@ -74,17 +95,7 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 		}
 		return new Integer(readValue);
 		// return readValue; also works in Java 1.5 because of auto-boxing
-	}
-
-	public Integer visit(VarExpr expr, Environment env) {
-		return env.get(expr);
-	}
-
-	public Integer visit(NumberExpr expr, Environment env) {
-		return new Integer(expr.value);		
-		// return expr.value; also works in Java 1.5 because of auto-boxing
-	}
-	
+	}	
 	
 	public SymbolType visit(newArray arr, Environment env) {
 		SymbolType typeSize = arr.length.accept(this, env);
@@ -119,7 +130,6 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 					throw new RuntimeException(expr.getLine()+
 							": Invalid type in an umary minus opertaion.");
 				}
-				break;
 			case LNEG:
 				if (type.isBoolType())
 				{
@@ -130,11 +140,9 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 					throw new RuntimeException(expr.getLine()+
 							": Invalid type in an umary 'not' opertaion.");
 				}
-				break;
 			default:
 				throw new RuntimeException(expr.getLine()+
 						": Invalid type in an umary opertaion.");
-				break;
 		}
 	}
 
@@ -144,7 +152,7 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 		SymbolType type2 = expr.rhs.accept(this, env);
 		
 		if (type1 == null || type2 == null) {
-			throw new Exception(expr.getLine()+
+			throw new RuntimeException(expr.getLine()+
 					": can not perform binary operation on a VOID type parameter.");
 		}
 
@@ -176,8 +184,6 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 					throw new RuntimeException(expr.getLine()+
 							": Invalid  usage of a arithmetic operation <" + expr.op.toString() +">." );
 				}
-				throw new RuntimeException(expr.getLine()+
-						": Invalid  usage of a arithmetic operation <" + expr.op.toString() + "> with a non-integer expression.");
 			case LT:
 			case GT:
 			case LE:
@@ -191,7 +197,6 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 					throw new RuntimeException(expr.getLine()+
 						": Invalid  usage of a binary operation <"+ expr.op.toString()+ "> with a non-integer expression.");
 				}
-				break;
 			case LAND:
 			case LOR:
 				if (type1.isBoolType() && type2.isBoolType())
@@ -203,7 +208,6 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 				throw new RuntimeException(expr.getLine()+
 						": Invalid usage of a binary operation <"+ expr.op.toString()+ "> with a non-boolean expression.");
 				}
-				break;
 			case NEQUAL:
 			case EQUAL:
 				if (type1.equals(type2))
@@ -217,45 +221,34 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 			default:
 				throw new RuntimeException(expr.getLine()+
 						": Invalid use of a binary operation.");
-				break;
 		}
 	}
 	public SymbolType visit(Program prog, Environment env)
 	{	
-		SymbolTable programSymTable = // somhow get the program's symbol table
+		table = new SymbolTable();// somhow get the program's symbol table
 		
 		for (ICClass cls : prog.getClasses()) 
 		{
-
 			String classId = cls.getName();
-			// TODO: classType = getClassTypeFromSymbolTable(classId)
-			Category classCtrg = Category.CLASS;
+			symbolTypes.SymbolType classType = type_t.getClassTypeFromDict(classId);
+			
+			cls.setNodeType(classType);
+			
 			// add class to symbolTable
-
-			// add the class as an entry in the program's SymbolTable.
-
-
-			// Set the ASTNode's entry type.
-			cls.setEntryType(classType); // decleration of classType is in comment. implement and it will work
-
-			// set Parent Symbol Table:
-			SymbolTable parentSymTable;
-
+			table.InsertNewDecleration(classId, classType);
+			table.StartScope();
+			
+			cls.accept(this, env); // get all the relevant methods and variables of the class
+			
 			if (cls.hasSuperClass()) 
 			{
 				// add enable way to get symbols from parnt symbol table
-				parentSymTable
 			} 
 			else 
 			{
-				parentSymTable = programSymTable;
 			}
-
-			// Create Class'es Symbol Table
-			SymbolTable classSymTable = new SymbolTable(); // params??
-
-			// Set parent table pointers
-			// here? in symbolTable class?
+			
+			table.ExitScope();
 		}
 
 		return null;
@@ -263,8 +256,8 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 	public SymbolType visit(ICClass cls, Environment env)
 	{
 		String classId = cls.getName();
-		SymbolTable classSymTable = // somhow get the program's symbol table
-		// Add all Fields - Members:
+		//SymbolTable classSymTable = // somehow get the program's symbol table
+		// Add all Members:
 		for (ClassMember member : cls.getMembers()) {
 
 			// Initialize needed parameters:
@@ -272,59 +265,83 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 			{
 				ClassField field = (ClassField)member;
 				String fieldId = field.getName();
-				symbolTypes.SymbolType fieldType = // get type from table
-				Category fieldCategoty = Category.FIELD; 
+				symbolTypes.SymbolType fieldType = type_t.getTypeFromAST(field.getType());
+				field.setNodeType(fieldType);
+				// Can't have other variables with the same name
 				
-				// cant have other vars with the same name
 				// entry = getFromSymbolTable (fieldId, symbolTable)
-				if (entry != null) // TODO: implement the above code, and use the entry
+				if (table.IsDeclaredInCurrentScope(fieldId))
 				{
 					throw new RuntimeException(field.getLine()+": Variable shadowing is not possible for field "+ fieldId + "."));
 				}
 				
 				// add the field to the symbol table
-				if(add == false)
+				if(!table.InsertNewDecleration(fieldId, fieldType))
 				{
-					throw new RuntimeException(field.getLine()+": field "+ field.getName() +" is declared more than once")
+					throw new RuntimeException(field.getLine()+": field "+ field.getName() +" is declared more than once");
 				}
 				
-				field.setNodeType(fieldType);
+			
+				field.accept(this, env);
+				
 			}
 			if (member instanceof ClassMethod)
 			{
 				ClassMethod method = (ClassMethod)member;
 				String methodId = method.getName();
-				symbolTypes.SymbolType methodType = // get type from table
+				symbolTypes.SymbolType methodType = type_t.getMethodTypeFromDict(method);
+				method.setNodeType(methodType);
 						
 				// add the method to the symbol table
-				if (add == false)
+				if (!table.InsertNewDecleration(methodId, methodType))
 				{
-					throw new RuntimeException(method.getLine()+": method "+ method.getName() +" is declared more than once")
+					throw new RuntimeException(method.getLine()+": method "+ method.getName() +" is declared more than once");
 				}
+				// method scope
+				table.StartScope();
 				
-				method.setNodeType(methodType);
-				SymbolTable mathodTable = new SymbolTable (); // new symbolTable for mathod
-				//add stuff to method's table
+				method.accept(this, env);
+				
+				table.ExitScope();
 			}
 			
 
 		}
 		return null;
 	}
-	public Integer visit(ClassField field, Environment env)
+	public SymbolType visit(ClassField field, Environment env)
 	{
 		return null;
 	}
-	public Integer visit(MethodFormal formal, Environment env)
+	public SymbolType visit(MethodFormal formal, Environment env)
 	{
+		String formalId = formal.getName();
+		SymbolType formalType = type_t.getTypeFromAST(formal.getType());
+		String formalID = formal.getName();
+		formal.setNodeType(formalType);
+		if (!table.IsDeclaredInCurrentScope(formalId))
+		{
+			table.InsertNewDecleration(formalId, formalType);
+		}
+		else
+		{
+			throw new RuntimeException(formal.getLine()+": formal "+formalId+" is declered more than once.");
+		}
+	}
+	
+	public SymbolType visit(ClassMethod method, Environment env)
+	{
+		visitMethod(method, env);
 		return null;
 	}
-	public Integer visit(StaticMethod method, Environment env)
+	public SymbolType visit(StaticMethod method, Environment env)
 	{
+		visitMethod(method, env);
 		return null;
 	}
-	public Integer visit(VirtualMethod method, Environment env)
+	public SymbolType visit(VirtualMethod method, Environment env)
 	{
+		visitMethod(method, env);
 		return null;
 	}
 	public Integer visit(PrimitiveType ptype, Environment env)
@@ -334,5 +351,79 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 	public Integer visit(ObjectClassType octype, Environment env)
 	{
 		return null;
+	}
+	
+	public SymbolType visit(BlockStmt blk, Environment env)
+	{
+		table.StartScope();
+		
+		for (Stmt stmnt : blk.m_stmtList.statements)
+		{
+			stmnt.accept(this, env);
+		}
+		
+		table.ExitScope();
+	}
+	public SymbolType visit(CallStmt call, Environment env)
+	{
+		call.getCall().accept(this, env);
+	}
+	
+	public SymbolType visit(If stmt, Environment env) 
+	{
+		stmt.getCondition().accept(this, env);
+		
+		table.StartScope();
+		stmt.getOperation().accept(this, env);
+		table.ExitScope();
+
+		// Validate "else" statement
+		if (stmt.hasElse()) 
+		{
+			table.StartScope();
+			stmt.getElseOperation().accept(this, env);
+			table.ExitScope();
+		}
+	}
+	
+	public SymbolType visit(While stmt, Environment env) 
+	{
+		stmt.getCondition().accept(this,env);
+		
+		table.StartScope();
+		stmt.getOperation().accept(this, env);
+		table.ExitScope();
+	}
+	
+	public SymbolType visit(Break stmt, Environment env)
+	{
+	}
+
+	public SymbolType visit(Continue stmt,  Environment env)
+	{
+	}
+	
+	public SymbolType (StaticFunctionCall statCall, Environment env)
+	{
+
+	}
+	
+	private void visitMethod(ClassMethod method, Environment env) 
+	{
+		String methodID = method.getName();
+
+		for (MethodFormal formal : method.getFormals()) 
+		{
+			String formalId = formal.getName();
+			symbolTypes.SymbolType formalType = type_t.getTypeFromAST(formal.getType());
+			formal.setNodeType(formalType);
+			
+			formal.accept(this, env);
+		}
+
+		for (Stmt stmnt : method.statements.statements)
+		{
+			stmnt.accept(this, env);
+		}
 	}
 }

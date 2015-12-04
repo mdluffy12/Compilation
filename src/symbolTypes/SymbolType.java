@@ -8,6 +8,11 @@ public abstract class SymbolType {
 		this.name=name;
 	}
 	
+	public boolean compareType(SymbolType otherType)
+	{
+		return (this.equals(otherType));
+	}
+	
 	public boolean subTypeOf(SymbolType type)
 	{
 		if (this.equals(type))

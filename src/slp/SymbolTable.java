@@ -1,4 +1,4 @@
-package src.slp;
+package slp;
 import symbolTypes.*;
 
 public class SymbolTable {
@@ -40,7 +40,7 @@ public class SymbolTable {
 		
 	}
 	
-	public void InsertNewDecleration(String name, Type t1)
+	public void InsertNewDecleration(String name, SymbolType t1)
 	{
 		
 	}

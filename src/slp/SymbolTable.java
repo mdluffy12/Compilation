@@ -1,8 +1,9 @@
-package slp;
+package src.slp;
+import symbolTypes.*;
 
 public class SymbolTable {
 	
-	public SymbolTable()()
+	public SymbolTable()
 	{
 		
 	}
@@ -10,22 +11,23 @@ public class SymbolTable {
 	/*
 	 * is variable declared in current scopt
 	 */
-	bool IsDeclaredInCurrentScope(String name)
+	public boolean IsDeclaredInCurrentScope(String name)
 	{
-		
+		return true;
 	}
 	/*
 	 * get the closest variable with the same name as the given name
 	 */
-	Type GetClosestVarWithSameName(String name)
+	public SymbolType GetClosestVarWithSameName(String name)
 	{
+		return null;
 		
 	}
 	
 	/*
 	 * starting new scope of a function, block, class, etc
 	 */
-	void StartScope()
+	public void StartScope()
 	{
 		
 	}
@@ -33,12 +35,12 @@ public class SymbolTable {
 	/*
 	 * exiting the scope and returning to the old scope
 	 */
-	void ExitScope()
+	public void ExitScope()
 	{
 		
 	}
 	
-	void InsertNewDecleration(String name, Type t1)
+	public void InsertNewDecleration(String name, Type t1)
 	{
 		
 	}

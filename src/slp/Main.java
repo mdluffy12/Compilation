@@ -45,9 +45,8 @@ public class Main {
 			printer.print();
 			
 			System.out.println("Finished Printing the AST!!");
-			// Interpret the program
-			//SLPEvaluator evaluator = new SLPEvaluator(root);
-			//evaluator.evaluate();
+			
+			SymbolTable table;
 			
 			symbolTypes.TypeTableMgr typeMgr = new symbolTypes.TypeTableMgr();
 			typeMgr.create((Program)root);

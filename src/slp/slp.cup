@@ -283,7 +283,7 @@ stmt ::= Location:l ASSIGN expr:e SEMI
 	IF LP expr:e RP stmt:doStmt else_stmt:eStmt
 	{: RESULT = new If(e,doStmt,eStmt); :}|
 	WHILE LP expr:e RP stmt:doStmt
-	{: RESULT = new While(e,doStmt); :}|
+	{: RESULT = new While(e,doStmt); :}| 
 	BREAK SEMI
 	{: RESULT = new Break(); :}|
 	CONTINUE SEMI

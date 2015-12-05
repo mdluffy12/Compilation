@@ -1,4 +1,4 @@
-package src.symbolTypes;
+package symbolTypes;
 
 public class VoidType extends SymbolType
 {

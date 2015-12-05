@@ -11,7 +11,8 @@ public class Environment {
 	 * for each variable. 
 	 */
 	private Map<String,Integer> varToValue = new HashMap<String,Integer>();
-	
+	public int loop_counter = 0; /* counts in how many loops we are in (for example 2 nested loops; the inside of them would be count = 2)*/
+	public SymbolTable symbolTable = new SymbolTable();
 	/** Updates the value of a variable.
 	 * 
 	 * @param v A variable expression.

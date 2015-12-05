@@ -14,15 +14,19 @@ import IC.Symbol.Kind;
 import IC.Symbol.Symbol;
 import IC.Symbol.SymbolTable;
 import IC.Symbol.SymbolTableType;
+import jdk.nashorn.internal.ir.BlockStatement;
 import symbolTypes.*;
+import slp.BlockStmt;
 import slp.ClassField;
 import slp.Environment;
 import slp.ICClass;
+import slp.LocalVar;
 import slp.MethodFormal;
 import slp.ObjectClassType;
 import slp.PrimitiveType;
 import slp.Program;
 import slp.StaticMethod;
+import slp.Stmt;
 import slp.VirtualMethod;
 
 /** Evaluates straight line programs.
@@ -309,10 +313,21 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 		}
 		return null;
 	}
+	
 	public SymbolType visit(ClassField field, Environment env)
 	{
-		return null;
+		if(!env.symbolTable.IsDeclaredInCurrentScope(field.getName()))
+		{
+			throw new RuntimeException(field.getLine() + ": field" + field.getName() + "is declared more than once.");
+		}
+		else
+		{
+			SymbolType fieldSymbol = new SymbolType(field.getName());
+			field.getType().accept(this, env);
+			return fieldSymbol;
+		}
 	}
+	
 	public SymbolType visit(MethodFormal formal, Environment env)
 	{
 		String formalId = formal.getName();
@@ -336,21 +351,61 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 	}
 	public SymbolType visit(StaticMethod method, Environment env)
 	{
-		visitMethod(method, env);
-		return null;
+		if(!env.symbolTable.IsDeclaredInCurrentScope(method.getName()))
+		{
+			throw new RuntimeException("static method: " + method.getName()+ " has been declared more than once.");
+		}
+		else
+		{
+			env.symbolTable.StartScope();
+			SymbolType methodType = type_t.getTypeFromAST(method.getType());
+			env.symbolTable.InsertNewDecleration(method.getName(), methodType);
+			for (MethodFormal formal : method.getFormals())
+			{
+				SymbolType formalType = formal.accept(this, env);
+				env.symbolTable.InsertNewDecleration(formal.getName(), formalType);
+			}
+			
+			for (Stmt s : method.getStatements().statements)
+			{
+				SymbolType stmtSymbol = s.accept(this, env);
+				if ( (s != null) && (s.getClass() == LocalVar.class) || (s.getClass() == BlockStmt.class))
+					env.symbolTable.InsertNewDecleration(s.toString(), stmtSymbol);
+			}
+			method.getType().accept(this, env);
+			env.symbolTable.ExitScope();
+			return methodType;
+			
+		}
 	}
 	public SymbolType visit(VirtualMethod method, Environment env)
 	{
-		visitMethod(method, env);
-		return null;
-	}
-	public Integer visit(PrimitiveType ptype, Environment env)
-	{
-		return null;
-	}
-	public Integer visit(ObjectClassType octype, Environment env)
-	{
-		return null;
+		if(!env.symbolTable.IsDeclaredInCurrentScope(method.getName()))
+		{
+			throw new RuntimeException("static method: " + method.getName()+ " has been declared more than once.");
+		}
+		else
+		{
+			env.symbolTable.StartScope();
+			SymbolType methodType = type_t.getTypeFromAST(method.getType());
+			env.symbolTable.InsertNewDecleration(method.getName(), methodType);
+			for (MethodFormal formal : method.getFormals())
+			{
+				SymbolType formalType = formal.accept(this, env);
+				env.symbolTable.InsertNewDecleration(formal.getName(), formalType);
+			}
+			
+			for (Stmt s : method.getStatements().statements)
+			{
+				SymbolType stmtSymbol = s.accept(this, env);
+				if ( (s != null) && (s.getClass() == LocalVar.class) || (s.getClass() == BlockStmt.class))
+					env.symbolTable.InsertNewDecleration(s.toString(), stmtSymbol);
+			}
+			method.getType().accept(this, env);
+			env.symbolTable.ExitScope();
+			return methodType;
+			
+		}
 	}
 	
 	public SymbolType visit(BlockStmt blk, Environment env)
@@ -371,7 +426,12 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 	
 	public SymbolType visit(If stmt, Environment env) 
 	{
-		stmt.getCondition().accept(this, env);
+		SymbolType sym_type = stmt.getCondition().accept(this, env);
+		if(!sym_type.isBoolType())
+		{
+			throw new RuntimeException(stmt.getLine()+
+					": Invalid expression inside if, condition is not of boolean type.");
+		}
 		
 		table.StartScope();
 		stmt.getOperation().accept(this, env);
@@ -389,23 +449,36 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 	public SymbolType visit(While stmt, Environment env) 
 	{
 		stmt.getCondition().accept(this,env);
-		
+		env.loop_counter += 1;
 		table.StartScope();
 		stmt.getOperation().accept(this, env);
 		table.ExitScope();
+		env.loop_counter -= 1;
 	}
 	
 	public SymbolType visit(Break stmt, Environment env)
 	{
+		if (env.loop_counter == 0)
+		{
+			throw new RuntimeException(stmt.getLine()+
+					": Invalid  usage of a break statement not inside of loop");
+		}
+		return null;
 	}
 
 	public SymbolType visit(Continue stmt,  Environment env)
 	{
+		if (env.loop_counter == 0)
+		{
+			throw new RuntimeException(stmt.getLine()+
+					": Invalid  usage of a continue statement not inside of loop");
+		}
+		return null;
 	}
 	
 	public SymbolType (StaticFunctionCall statCall, Environment env)
 	{
-
+		
 	}
 	
 	private void visitMethod(ClassMethod method, Environment env) 

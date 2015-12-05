@@ -39,5 +39,6 @@ public class StaticMethod extends ClassMethod
 	public <DownType, UpType> UpType accept(
 			PropagatingVisitor<DownType, UpType> visitor, DownType context) {
 		return visitor.visit(this, context);
-	}	
+	}
+	
 }

@@ -341,7 +341,7 @@ expr ::= expr:e1 PLUS:p expr:e2
 		{: RESULT = new BinaryOpExpr(e1, e2, Operator.NEQUAL);
 		   :}
 		| MINUS expr:e1
-		{: RESULT = new UnaryOpExpr(e1, Operator.MINUS); :} %prec UMINUS
+		{: RESULT = new UnaryOpExpr(e1, Operator.UMINUS); :} %prec UMINUS
 		| LNEG expr:e1
 		{: RESULT = new UnaryOpExpr(e1, Operator.LNEG); :}
 		| LP expr:e RP

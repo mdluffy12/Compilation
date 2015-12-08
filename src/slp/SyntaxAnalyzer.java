@@ -2,18 +2,6 @@ package slp;
 
 import java.io.IOException;
 
-import IC.AST.Break;
-import IC.AST.Continue;
-import IC.AST.Expression;
-import IC.AST.Formal;
-import IC.AST.If;
-import IC.AST.Method;
-import IC.AST.Statement;
-import IC.AST.While;
-import IC.Symbol.Kind;
-import IC.Symbol.Symbol;
-import IC.Symbol.SymbolTable;
-import IC.Symbol.SymbolTableType;
 import jdk.nashorn.internal.ir.BlockStatement;
 import symbolTypes.*;
 import slp.BlockStmt;
@@ -31,23 +19,23 @@ import slp.VirtualMethod;
 
 /** Evaluates straight line programs.
  */
-public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes.SymbolType> 
+public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTypes.SymbolType> 
 {
+
 	protected ASTNode root;
 	protected TypeTable type_t;
-	protected SymbolTable table;
-
 	/** Constructs an SLP interpreter for the given AST.
 	 * 
 	 * @param root An SLP AST node.
 	 */
-	public SLPEvaluator(ASTNode root) {
+	public SyntaxAnalyzer(ASTNode root, TypeTable type_t) {
 		this.root = root;
+		this.type_t = type_t;
 	}
 	
 	/** Interprets the AST passed to the constructor.
 	 */
-	public void evaluate() {
+	public void Analyze() {
 		Environment env = new Environment();
 		root.accept(this, env);
 	}
@@ -82,30 +70,19 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 			throw new RuntimeException(stmt.getLine()+
 					": can not perform assignment from type "+type2.toString() +" to type "+type1.toString());
 		}
+		return null;
 	}
 
 	public SymbolType visit(Expr expr, Environment env) {
 		throw new RuntimeException("Unexpected visit of Expr!");
 	}
 
-	public Integer visit(ReadIExpr expr, Environment env) {
-		int readValue;
-		try {
-			System.out.println("Enter number: ");
-			readValue = System.in.read();
-		}
-		catch (IOException e) {
-			throw new RuntimeException(e.getMessage());
-		}
-		return new Integer(readValue);
-		// return readValue; also works in Java 1.5 because of auto-boxing
-	}	
 	
 	public SymbolType visit(newArray arr, Environment env) {
 		SymbolType typeSize = arr.length.accept(this, env);
 
 		if (typeSize == null || !typeSize.isIntType()) {
-			throw new RuntimeException(newArray.getLine()+
+			throw new RuntimeException(arr.getLine()+
 					": Size of array must be an integer number.");
 		}
 
@@ -132,7 +109,7 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 				else
 				{
 					throw new RuntimeException(expr.getLine()+
-							": Invalid type in an umary minus opertaion.");
+							": Invalid type in an unary minus opertaion.");
 				}
 			case LNEG:
 				if (type.isBoolType())
@@ -142,11 +119,11 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 				else
 				{
 					throw new RuntimeException(expr.getLine()+
-							": Invalid type in an umary 'not' opertaion.");
+							": Invalid type in an unary 'not' opertaion.");
 				}
 			default:
 				throw new RuntimeException(expr.getLine()+
-						": Invalid type in an umary opertaion.");
+						": Invalid type in an unary opertaion.");
 		}
 	}
 
@@ -229,8 +206,6 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 	}
 	public SymbolType visit(Program prog, Environment env)
 	{	
-		table = new SymbolTable();// somhow get the program's symbol table
-		
 		for (ICClass cls : prog.getClasses()) 
 		{
 			String classId = cls.getName();
@@ -239,8 +214,8 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 			cls.setNodeType(classType);
 			
 			// add class to symbolTable
-			table.InsertNewDecleration(classId, classType);
-			table.StartScope();
+			env.symbolTable.InsertNewDecleration(classId, classType);
+			env.symbolTable.StartScope();
 			
 			cls.accept(this, env); // get all the relevant methods and variables of the class
 			
@@ -252,7 +227,7 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 			{
 			}
 			
-			table.ExitScope();
+			env.symbolTable.ExitScope();
 		}
 
 		return null;
@@ -274,17 +249,17 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 				// Can't have other variables with the same name
 				
 				// entry = getFromSymbolTable (fieldId, symbolTable)
-				if (table.IsDeclaredInCurrentScope(fieldId))
+				if (env.symbolTable.IsDeclaredInCurrentScope(fieldId))
 				{
-					throw new RuntimeException(field.getLine()+": Variable shadowing is not possible for field "+ fieldId + "."));
+					throw new RuntimeException(field.getLine()+": Variable shadowing is not possible for field "+ fieldId + ".");
 				}
 				
 				// add the field to the symbol table
-				if(!table.InsertNewDecleration(fieldId, fieldType))
+				if(env.symbolTable.IsDeclaredInCurrentScope(fieldId))
 				{
 					throw new RuntimeException(field.getLine()+": field "+ field.getName() +" is declared more than once");
 				}
-				
+				env.symbolTable.InsertNewDecleration(fieldId, fieldType);
 			
 				field.accept(this, env);
 				
@@ -297,16 +272,17 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 				method.setNodeType(methodType);
 						
 				// add the method to the symbol table
-				if (!table.InsertNewDecleration(methodId, methodType))
+				if (env.symbolTable.IsDeclaredInCurrentScope(methodId))
 				{
 					throw new RuntimeException(method.getLine()+": method "+ method.getName() +" is declared more than once");
 				}
+				env.symbolTable.InsertNewDecleration(methodId, methodType);
 				// method scope
-				table.StartScope();
+				env.symbolTable.StartScope();
 				
 				method.accept(this, env);
 				
-				table.ExitScope();
+				env.symbolTable.ExitScope();
 			}
 			
 
@@ -322,9 +298,8 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 		}
 		else
 		{
-			SymbolType fieldSymbol = new SymbolType(field.getName());
 			field.getType().accept(this, env);
-			return fieldSymbol;
+			return null;
 		}
 	}
 	
@@ -334,9 +309,10 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 		SymbolType formalType = type_t.getTypeFromAST(formal.getType());
 		String formalID = formal.getName();
 		formal.setNodeType(formalType);
-		if (!table.IsDeclaredInCurrentScope(formalId))
+		if (!env.symbolTable.IsDeclaredInCurrentScope(formalId))
 		{
-			table.InsertNewDecleration(formalId, formalType);
+			env.symbolTable.InsertNewDecleration(formalId, formalType);
+			return null;
 		}
 		else
 		{
@@ -410,18 +386,20 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 	
 	public SymbolType visit(BlockStmt blk, Environment env)
 	{
-		table.StartScope();
+		env.symbolTable.StartScope();
 		
 		for (Stmt stmnt : blk.m_stmtList.statements)
 		{
 			stmnt.accept(this, env);
 		}
 		
-		table.ExitScope();
+		env.symbolTable.ExitScope();
+		return null;
 	}
 	public SymbolType visit(CallStmt call, Environment env)
 	{
 		call.getCall().accept(this, env);
+		return null;
 	}
 	
 	public SymbolType visit(If stmt, Environment env) 
@@ -433,27 +411,29 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 					": Invalid expression inside if, condition is not of boolean type.");
 		}
 		
-		table.StartScope();
+		env.symbolTable.StartScope();
 		stmt.getOperation().accept(this, env);
-		table.ExitScope();
+		env.symbolTable.ExitScope();
 
 		// Validate "else" statement
 		if (stmt.hasElse()) 
 		{
-			table.StartScope();
+			env.symbolTable.StartScope();
 			stmt.getElseOperation().accept(this, env);
-			table.ExitScope();
+			env.symbolTable.ExitScope();
 		}
+		return null;
 	}
 	
 	public SymbolType visit(While stmt, Environment env) 
 	{
 		stmt.getCondition().accept(this,env);
 		env.loop_counter += 1;
-		table.StartScope();
+		env.symbolTable.StartScope();
 		stmt.getOperation().accept(this, env);
-		table.ExitScope();
+		env.symbolTable.ExitScope();
 		env.loop_counter -= 1;
+		return null;
 	}
 	
 	public SymbolType visit(Break stmt, Environment env)
@@ -476,9 +456,9 @@ public class SLPEvaluator implements PropagatingVisitor<Environment, symbolTypes
 		return null;
 	}
 	
-	public SymbolType (StaticFunctionCall statCall, Environment env)
+	public SymbolType visit(StaticFunctionCall statCall, Environment env)
 	{
-		
+		return null;
 	}
 	
 	private void visitMethod(ClassMethod method, Environment env) 

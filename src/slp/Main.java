@@ -51,11 +51,12 @@ public class Main {
 			symbolTypes.TypeTableMgr typeMgr = new symbolTypes.TypeTableMgr();
 			typeMgr.create((Program)root);
 			
-			//call the symbolTable builder and make SLPEvaluetor work....
+			SyntaxAnalyzer analyzer = new SyntaxAnalyzer(root, typeMgr.getTypeTable());
+			analyzer.Analyze();
 			
 			
 		} catch (Exception e) {
-			System.out.print(e);
+			e.printStackTrace(System.out);
 		}
 	}
 	

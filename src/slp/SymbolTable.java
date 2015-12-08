@@ -10,6 +10,7 @@ public class SymbolTable {
 	public SymbolTable()
 	{
 		scopesHashTables = new ArrayList<HashMap<String, SymbolType>>();
+		StartScope();
 	}
 	
 	/*

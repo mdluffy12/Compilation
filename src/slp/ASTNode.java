@@ -8,8 +8,6 @@ public abstract class ASTNode {
 	/** Accepts a visitor object as part of the visitor pattern.
 	 * @param visitor A visitor.
 	 */
-	
-	private SymbolType nodeType; // somehow add type to all nodes...
 	private int line; // somehow add line number here.....
 	
 	
@@ -18,16 +16,6 @@ public abstract class ASTNode {
 	public int getLine() 
 	{
 		return line;
-	}
-	
-	public  SymbolType getNodeType() 
-	{
-		return this.nodeType;
-	}
-
-	public void setNodeType(symbolTypes.SymbolType nodeType) 
-	{
-		this.nodeType = nodeType;
 	}
 	
 	public abstract void accept(Visitor visitor);

@@ -22,22 +22,149 @@ import slp.VirtualMethod;
 public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTypes.SymbolType> 
 {
 
-	protected ASTNode root;
-	protected TypeTable type_t;
+	protected Program root;
 	/** Constructs an SLP interpreter for the given AST.
 	 * 
 	 * @param root An SLP AST node.
 	 */
-	public SyntaxAnalyzer(ASTNode root, TypeTable type_t) {
-		this.root = root;
-		this.type_t = type_t;
+	public SyntaxAnalyzer(ASTNode root) {
+		this.root = (Program)root;
 	}
 	
 	/** Interprets the AST passed to the constructor.
 	 */
 	public void Analyze() {
 		Environment env = new Environment();
+		System.out.println("Inserting All Classess Information");
+		InsertAllClassInformation(root, env);
+		System.out.println("Checking Main");
+		containsMain(root);
+		System.out.println("Going Over Main Syntax Analysis");
 		root.accept(this, env);
+	}
+	
+	private void InsertAllClassInformation(Program prog1, Environment env) {
+		
+		
+		for (ICClass cls : prog1.getClasses()) //first pass insert all classes
+		{
+			ClassType parentClassType = null;
+			if(cls.hasSuperClass())
+			{
+				SymbolType t1 = env.symbolTable.GetClosestVarWithSameName(cls.getSuperClassName());
+				if(t1 == null)
+				{
+					throw new RuntimeException(cls.getLine()+
+							":" + "Super class " + cls.getSuperClassName() + " is not defined!");
+				}
+				parentClassType = (ClassType)t1;
+			}
+			
+			if(env.symbolTable.GetClosestVarWithSameName(cls.getName()) != null)
+			{
+				throw new RuntimeException(cls.getLine()+
+						":" + "Class " + cls.getName() + " is already defined!");
+			}
+			
+			ClassType clsType = new ClassType(cls.getName(), parentClassType);
+			//we are inserting to both because classes themselves should exists everywhere
+			env.symbolTable.InsertNewDeclerationAsBothStaticAndVirtual(cls.getName(), clsType);
+		}
+		
+		//second pass insert all members and functions;
+		for (ICClass cls : prog1.getClasses())
+		{
+			ClassType clsType = (ClassType)env.symbolTable.GetClosestVarWithSameName(cls.getName());
+			
+			for (ClassMember member : cls.getMembers())
+			{
+				SymbolType memberType = null;
+				if(member instanceof ClassField)
+				{
+					ClassField field = (ClassField)member;
+					if(clsType.GetMemberFromMeOrClosestParent(field.getName()) != null)
+					{
+						throw new RuntimeException(field.getLine()+
+								":" + "Field member already defined in the class or parent class. hiding or redefinition is not allowed.");
+					}
+					memberType = SymbolType.getTypeFromAST(field.getType(), env.symbolTable);
+					if(memberType == null)
+					{
+						throw new RuntimeException(field.getLine()+
+								":" + "Unknown member type " + field.getType().getName());
+					}
+					clsType.AddNewMember(field.getName(), memberType);
+				}
+				else
+				{
+					
+					
+					ClassMethod met1 = (ClassMethod)member;
+					memberType = SymbolType.createMethType(met1, env.symbolTable);
+					
+					if(clsType.GetMemberFromCurrentClassOnly(met1.getName()) != null)
+					{
+						throw new RuntimeException(member.getLine()+
+								":" + "A method with the same name is already defined in this class method overloading or redifining is not allowed");
+					}
+					SymbolType overriddenMethod = clsType.GetMemberFromMeOrClosestParent(met1.getName());
+					if(overriddenMethod != null)
+					{
+						if(overriddenMethod.toString().equals(memberType.toString()) == false)
+						throw new RuntimeException(member.getLine()+
+								":" + "cannot define the method " + memberType.getName() + " with the type " + memberType.toString() + 
+								" as an override to the type " + overriddenMethod.toString() + " the methods doesn't have the same signature or the other is a var");
+					}
+					clsType.AddNewMember(met1.getName(), memberType);
+				}
+			}
+		}
+	}
+
+	private void containsMain(Program program) {
+		int mainCount = 0;
+		int iLineNumber = 0;
+		ClassMethod mainMethod = null;
+		for (ICClass cls : program.getClasses()) {
+			for (ClassMember member : cls.getMembers())
+			{
+				if (member instanceof ClassMethod)
+				{
+					ClassMethod method = (ClassMethod)member;
+					if (method.getName().equals("main")) 
+					{
+						mainMethod = method;
+						++mainCount;
+						iLineNumber = method.getLine();
+					}
+				}
+			}
+		}
+		if (mainCount == 0) 
+		{
+			throw new RuntimeException("Main method is undeclared.");
+		}
+		if (mainCount != 1)
+		{
+			throw new RuntimeException("Main method declared multiple times.");
+		}
+		
+		if(mainMethod instanceof VirtualMethod)
+		{
+			throw new RuntimeException(iLineNumber + ":main must be a static function and not a virtual one");
+		}
+
+		if(mainMethod.getFormals().size() != 1)
+		{
+			throw new RuntimeException(iLineNumber + ":Only 1 argument is allowed for main function");
+		}
+		
+		slp.Type argsType = mainMethod.getFormals().get(0).getType();
+		if(!argsType.getName().equals("string") ||
+		   argsType.getDimension() != 1)
+		{
+			throw new RuntimeException(iLineNumber + ":The main function argument must be from the type String[]");
+		}
 	}
 	
 	public SymbolType visit(StmtList stmts, Environment env) 
@@ -71,10 +198,6 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 					": can not perform assignment from type "+type2.toString() +" to type "+type1.toString());
 		}
 		return null;
-	}
-
-	public SymbolType visit(Expr expr, Environment env) {
-		throw new RuntimeException("Unexpected visit of Expr!");
 	}
 
 	
@@ -208,35 +331,19 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 	{	
 		for (ICClass cls : prog.getClasses()) 
 		{
-			String classId = cls.getName();
-			symbolTypes.SymbolType classType = type_t.getClassTypeFromDict(classId);
-			
-			cls.setNodeType(classType);
-			
-			// add class to symbolTable
-			env.symbolTable.InsertNewDecleration(classId, classType);
-			env.symbolTable.StartScope();
-			
 			cls.accept(this, env); // get all the relevant methods and variables of the class
-			
-			if (cls.hasSuperClass()) 
-			{
-				// add enable way to get symbols from parnt symbol table
-			} 
-			else 
-			{
-			}
-			
-			env.symbolTable.ExitScope();
 		}
 
 		return null;
 	}
+	
 	public SymbolType visit(ICClass cls, Environment env)
 	{
 		String classId = cls.getName();
-		//SymbolTable classSymTable = // somehow get the program's symbol table
-		// Add all Members:
+		env.symbolTable.StartScope();
+		ClassType classType = (ClassType) env.symbolTable.GetClosestVarWithSameName(classId);
+		env.symbolTable.InsertNewDecleration("This", classType);
+		
 		for (ClassMember member : cls.getMembers()) {
 
 			// Initialize needed parameters:
@@ -244,23 +351,18 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			{
 				ClassField field = (ClassField)member;
 				String fieldId = field.getName();
-				symbolTypes.SymbolType fieldType = type_t.getTypeFromAST(field.getType());
-				field.setNodeType(fieldType);
-				// Can't have other variables with the same name
-				
-				// entry = getFromSymbolTable (fieldId, symbolTable)
-				if (env.symbolTable.IsDeclaredInCurrentScope(fieldId))
+				symbolTypes.SymbolType fieldType = classType.GetMemberFromCurrentClassOnly(fieldId);
+				if(fieldType == null)
 				{
-					throw new RuntimeException(field.getLine()+": Variable shadowing is not possible for field "+ fieldId + ".");
+					throw new RuntimeException("internal error symbol table is corrupted");
 				}
-				
 				// add the field to the symbol table
 				if(env.symbolTable.IsDeclaredInCurrentScope(fieldId))
 				{
 					throw new RuntimeException(field.getLine()+": field "+ field.getName() +" is declared more than once");
 				}
 				env.symbolTable.InsertNewDecleration(fieldId, fieldType);
-			
+				
 				field.accept(this, env);
 				
 			}
@@ -268,51 +370,48 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			{
 				ClassMethod method = (ClassMethod)member;
 				String methodId = method.getName();
-				symbolTypes.SymbolType methodType = type_t.getMethodTypeFromDict(method);
-				method.setNodeType(methodType);
+				symbolTypes.SymbolType methodType = classType.GetMemberFromCurrentClassOnly(methodId);
 						
 				// add the method to the symbol table
 				if (env.symbolTable.IsDeclaredInCurrentScope(methodId))
 				{
 					throw new RuntimeException(method.getLine()+": method "+ method.getName() +" is declared more than once");
 				}
-				env.symbolTable.InsertNewDecleration(methodId, methodType);
-				// method scope
-				env.symbolTable.StartScope();
-				
+				if(method instanceof StaticMethod)
+				{//this is a static method it can be called from static functions as well
+					env.symbolTable.InsertNewDeclerationAsBothStaticAndVirtual(methodId, methodType);
+				}
+				else
+				{
+					env.symbolTable.InsertNewDecleration(methodId, methodType);
+				}
 				method.accept(this, env);
-				
-				env.symbolTable.ExitScope();
 			}
 			
 
 		}
+		env.symbolTable.ExitScope();
 		return null;
 	}
 	
 	public SymbolType visit(ClassField field, Environment env)
 	{
-		if(!env.symbolTable.IsDeclaredInCurrentScope(field.getName()))
-		{
-			throw new RuntimeException(field.getLine() + ": field" + field.getName() + "is declared more than once.");
-		}
-		else
-		{
-			field.getType().accept(this, env);
-			return null;
-		}
+		return null;
 	}
 	
 	public SymbolType visit(MethodFormal formal, Environment env)
 	{
 		String formalId = formal.getName();
-		SymbolType formalType = type_t.getTypeFromAST(formal.getType());
-		String formalID = formal.getName();
-		formal.setNodeType(formalType);
+		SymbolType formalType = SymbolType.getTypeFromAST(formal.getType(), env.symbolTable);
+		if(formalType == null)
+		{
+			throw new RuntimeException(formal.getLine()+":Unknown formal type " + formalId);
+		}
+		
 		if (!env.symbolTable.IsDeclaredInCurrentScope(formalId))
 		{
 			env.symbolTable.InsertNewDecleration(formalId, formalType);
-			return null;
+			return formalType;
 		}
 		else
 		{
@@ -320,68 +419,35 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 		}
 	}
 	
-	public SymbolType visit(ClassMethod method, Environment env)
+	public SymbolType visit(StaticMethod method, Environment env)
+	{
+		env.symbolTable.StartStaticMode();
+		visitMethod(method, env);
+		env.symbolTable.StartVirtualMode();
+		return null;
+	}
+	
+	public SymbolType visit(VirtualMethod method, Environment env)
 	{
 		visitMethod(method, env);
 		return null;
 	}
-	public SymbolType visit(StaticMethod method, Environment env)
+	
+	public void visitMethod(ClassMethod method, Environment env)
 	{
-		if(!env.symbolTable.IsDeclaredInCurrentScope(method.getName()))
+		env.symbolTable.StartScope();
+		for (MethodFormal formal : method.getFormals())
 		{
-			throw new RuntimeException("static method: " + method.getName()+ " has been declared more than once.");
+			SymbolType formalType = formal.accept(this, env);
+			env.symbolTable.InsertNewDecleration(formal.getName(), formalType);
 		}
-		else
+		
+		for (Stmt s : method.getStatements().statements)
 		{
-			env.symbolTable.StartScope();
-			SymbolType methodType = type_t.getTypeFromAST(method.getType());
-			env.symbolTable.InsertNewDecleration(method.getName(), methodType);
-			for (MethodFormal formal : method.getFormals())
-			{
-				SymbolType formalType = formal.accept(this, env);
-				env.symbolTable.InsertNewDecleration(formal.getName(), formalType);
-			}
-			
-			for (Stmt s : method.getStatements().statements)
-			{
-				SymbolType stmtSymbol = s.accept(this, env);
-				if ( (s != null) && (s.getClass() == LocalVar.class) || (s.getClass() == BlockStmt.class))
-					env.symbolTable.InsertNewDecleration(s.toString(), stmtSymbol);
-			}
-			method.getType().accept(this, env);
-			env.symbolTable.ExitScope();
-			return methodType;
-			
+			s.accept(this, env);
 		}
-	}
-	public SymbolType visit(VirtualMethod method, Environment env)
-	{
-		if(!env.symbolTable.IsDeclaredInCurrentScope(method.getName()))
-		{
-			throw new RuntimeException("static method: " + method.getName()+ " has been declared more than once.");
-		}
-		else
-		{
-			env.symbolTable.StartScope();
-			SymbolType methodType = type_t.getTypeFromAST(method.getType());
-			env.symbolTable.InsertNewDecleration(method.getName(), methodType);
-			for (MethodFormal formal : method.getFormals())
-			{
-				SymbolType formalType = formal.accept(this, env);
-				env.symbolTable.InsertNewDecleration(formal.getName(), formalType);
-			}
-			
-			for (Stmt s : method.getStatements().statements)
-			{
-				SymbolType stmtSymbol = s.accept(this, env);
-				if ( (s != null) && (s.getClass() == LocalVar.class) || (s.getClass() == BlockStmt.class))
-					env.symbolTable.InsertNewDecleration(s.toString(), stmtSymbol);
-			}
-			method.getType().accept(this, env);
-			env.symbolTable.ExitScope();
-			return methodType;
-			
-		}
+		method.getType().accept(this, env);
+		env.symbolTable.ExitScope();
 	}
 	
 	public SymbolType visit(BlockStmt blk, Environment env)
@@ -411,27 +477,26 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 					": Invalid expression inside if, condition is not of boolean type.");
 		}
 		
-		env.symbolTable.StartScope();
 		stmt.getOperation().accept(this, env);
-		env.symbolTable.ExitScope();
 
 		// Validate "else" statement
 		if (stmt.hasElse()) 
 		{
-			env.symbolTable.StartScope();
 			stmt.getElseOperation().accept(this, env);
-			env.symbolTable.ExitScope();
 		}
 		return null;
 	}
 	
 	public SymbolType visit(While stmt, Environment env) 
 	{
-		stmt.getCondition().accept(this,env);
+		SymbolType sym_type = stmt.getCondition().accept(this,env);
+		if(!sym_type.isBoolType())
+		{
+			throw new RuntimeException(stmt.getLine()+
+					": Invalid expression inside While, condition is not of boolean type.");
+		}
 		env.loop_counter += 1;
-		env.symbolTable.StartScope();
 		stmt.getOperation().accept(this, env);
-		env.symbolTable.ExitScope();
 		env.loop_counter -= 1;
 		return null;
 	}
@@ -456,27 +521,160 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 		return null;
 	}
 	
-	public SymbolType visit(StaticFunctionCall statCall, Environment env)
-	{
+	@Override
+	public SymbolType visit(PrimitiveType ptype, Environment d) {
+		// TODO Auto-generated method stub
+		return SymbolType.getTypeFromAST(ptype, d.symbolTable);
+	}
+
+	@Override
+	public SymbolType visit(ObjectClassType octype, Environment d) {
+		// TODO Auto-generated method stub
+		SymbolType t1 =  SymbolType.getTypeFromAST(octype, d.symbolTable);
+		if(t1 == null)
+		{
+			throw new RuntimeException(octype.getLine()+
+					":" + "Unknown type " + octype.getName());
+		}
+		return t1;
+	}
+
+	@Override
+	public SymbolType visit(LocalVar lvar, Environment env) {
+		if (env.symbolTable.IsDeclaredInCurrentScope(lvar.getName()))
+		{
+			throw new RuntimeException(lvar.getLine()+
+					": a variable already declared in the current scope with this name " + lvar.getName());
+		}
+		SymbolType type1 = env.symbolTable.GetClosestVarWithSameName(lvar.getName());
+		if(type1 != null && type1 instanceof MethodType)
+		{
+			throw new RuntimeException(lvar.getLine()+
+					": it is not allowed to define a function and a variable with the same name '" + lvar.getName() + "'");
+		}
+		SymbolType varType = lvar.getType().accept(this, env);
+		env.symbolTable.InsertNewDecleration(lvar.getName(), varType);
+		if(lvar.hasInitValue())
+		{
+			SymbolType initValType = lvar.getInitValue().accept(this, env);
+			if(initValType.subTypeOf(varType) == false)
+			{
+				throw new RuntimeException(lvar.getLine()+
+						": it is not allowed to initialize a var with type " + varType.toString() + " with type " + initValType.toString() + " which is not a subtype");
+			}
+		}
 		return null;
 	}
-	
-	private void visitMethod(ClassMethod method, Environment env) 
-	{
-		String methodID = method.getName();
 
-		for (MethodFormal formal : method.getFormals()) 
-		{
-			String formalId = formal.getName();
-			symbolTypes.SymbolType formalType = type_t.getTypeFromAST(formal.getType());
-			formal.setNodeType(formalType);
-			
-			formal.accept(this, env);
-		}
+	@Override
+	public SymbolType visit(BoolLiteral bl, Environment d) {
+		return new BoolType();
+	}
 
-		for (Stmt stmnt : method.statements.statements)
+	@Override
+	public SymbolType visit(ExprLength exprLength, Environment d) {
+		SymbolType type1 = exprLength.e.accept(this, d);
+		if(!(type1 instanceof ArrType))
 		{
-			stmnt.accept(this, env);
+			throw new RuntimeException(exprLength.getLine()+
+					": Length is only accepted to use as part of an array! and this expression is not an array it is of type " + type1.toString());
 		}
+		return new IntType();
+	}
+
+	@Override
+	public SymbolType visit(IntLiteral intLit, Environment d) {
+		// TODO Auto-generated method stub
+		return new IntType();
+	}
+
+	@Override
+	public SymbolType visit(newClass nclss, Environment d) {
+		SymbolType type1 = d.symbolTable.GetClosestVarWithSameName(nclss.classID);
+		if(type1 == null)
+		{
+			throw new RuntimeException(exprLength.getLine()+
+					": there is no class of with the name " + nclss.classID);
+		}
+		return type1;
+	}
+
+	@Override
+	public SymbolType visit(NullLiteral nllLit, Environment d) {
+		// TODO Auto-generated method stub
+		return new NullType();
+	}
+
+	@Override
+	public SymbolType visit(Return retStmt, Environment d) {
+		fixme
+		return null;
+	}
+
+	@Override
+	public SymbolType visit(StaticFunctionCall sfc, Environment d) {
+		fixme
+		return null;
+	}
+
+	@Override
+	public SymbolType visit(StringLiteral slit, Environment d) {
+		return new StringType();
+	}
+
+	@Override
+	public SymbolType visit(This thisStmt, Environment d) {
+		fixme
+		return null;
+	}
+
+	@Override
+	public SymbolType visit(VarValueLocation varValLoc, Environment d) {
+		SymbolType t1 = null;
+		if(varValLoc.UseVarExpr)
+		{
+			SymbolType t2 = varValLoc.varExpression.accept(this, d);
+			if(!(t2 instanceof ClassType))
+			{
+				throw new RuntimeException(varValLoc.getLine()+
+						": you cannot take an attribue of not a class type (using '.')"
+						+ "the expression value was " + t2.toString());
+			}
+			ClassType clsType = (ClassType) t2;
+			t1 = clsType.GetMemberFromMeOrClosestParent(varValLoc.varID);
+			if(t1 == null)
+			{
+				throw new RuntimeException(varValLoc.getLine()+
+						": class" + t2.toString() + " has no member variable with the name " + varValLoc.varID);
+			}
+			if(t1 instanceof MethodType)
+			{
+				throw new RuntimeException(varValLoc.getLine()+
+						": class" + t2.toString() + " member  " + varValLoc.varID + " is a function but used like variable!");
+			}
+			return t1;
+		}
+		else
+		{
+			t1 = d.symbolTable.GetClosestVarWithSameName(varValLoc.varID);
+			if(t1 == null)
+			{
+				throw new RuntimeException(varValLoc.getLine()+
+						": no variable with the name " + varValLoc.varID + " exists");
+			}
+			return t1;
+		}
+	}
+
+	@Override
+	public SymbolType visit(VirtualFunctionCall vfc, Environment d) {
+		fixme
+		return null;
+	}
+
+	@Override
+	public SymbolType visit(ArrValueLocation arrValLoc, Environment d) {
+		fixme
+		return null;
 	}
 }

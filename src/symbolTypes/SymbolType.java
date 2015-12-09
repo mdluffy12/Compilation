@@ -1,21 +1,133 @@
 package symbolTypes;
 
+import java.util.List;
+
+import slp.StaticMethod;
+import slp.VirtualMethod;
+
 public abstract class SymbolType {
 	protected String name;
+	static private SymbolType intType = new IntType();
+	static private SymbolType stringType = new StringType();
+	static private SymbolType boolType = new BoolType();
+	static private SymbolType voidType = new VoidType();
+	static private SymbolType nullType = new NullType();
 	
 	public SymbolType(String name) 
 	{
 		this.name=name;
 	}
 	
+	static public SymbolType getTypeFromAST(slp.Type node, slp.SymbolTable table) {
+
+		if (node instanceof slp.PrimitiveType) {
+			slp.PrimitiveType primitiveType = (slp.PrimitiveType) node;
+			if (primitiveType.getDimension() != 0) 
+			{
+				return new ArrType(getPrimitiveType(node.getName()), primitiveType.getDimension());
+			} 
+			else 
+			{
+				return getPrimitiveType(node.getName());
+			}
+		} 
+		else 
+		{
+			slp.ObjectClassType objType = (slp.ObjectClassType) node;
+			SymbolType basicType = table.GetClosestVarWithSameName(objType.getName());
+			if(basicType == null)
+			{
+				return null;
+			}
+			if (objType.getDimension() != 0) 
+			{
+				return new ArrType(basicType, objType.getDimension());
+			} else {
+				return basicType;
+			}
+		}
+
+	}
+	
+	static public SymbolType getPrimitiveType(String dataTypeName) 
+	{
+		if (dataTypeName == slp.DataTypes.INT.getDescription()) 
+		{
+			return intType;
+		} 
+		else if (dataTypeName == slp.DataTypes.STRING.getDescription()) 
+		{
+			return stringType;
+		} 
+		else if (dataTypeName == slp.DataTypes.VOID.getDescription()) 
+		{
+			return voidType;
+		} 
+		else if (dataTypeName == slp.DataTypes.BOOLEAN.getDescription()) 
+		{
+			return boolType;
+		} 
+		else 
+		{
+			return null;
+		}
+	}
+	
+	static public MethodType createMethType(slp.ClassMethod method, slp.SymbolTable table) 
+	{
+		List<slp.MethodFormal> formals = method.getFormals();
+		SymbolType[] prms;
+		
+		boolean bIsStatic;
+		
+		if(method instanceof StaticMethod)
+		{
+			bIsStatic = true;
+		}
+		else if(method instanceof VirtualMethod)
+		{
+			bIsStatic = false;
+		}
+		else
+		{
+			throw new RuntimeException(method.getLine()+
+					":" + "Unknown method type");
+		}
+
+		if (method.getFormals().size() == 0) 
+		{
+			prms = new SymbolType[1];
+			prms[0] = new VoidType();
+		} 
+		else 
+		{
+			prms = new SymbolType[method.getFormals().size()];
+			for (int i = 0; i < prms.length; i++) 
+			{
+				prms[i] = getTypeFromAST(formals.get(i).getType(), table);
+				if(prms[i] == null)
+				{
+					return null;
+				}
+			}
+		}
+		SymbolType retType = getTypeFromAST(method.getType(), table);
+		if(retType == null)
+		{
+			return null;
+		}
+		MethodType method_type = new MethodType(prms, retType, bIsStatic);
+		return method_type;
+	}
+	
 	public boolean compareType(SymbolType otherType)
 	{
-		return (this.equals(otherType));
+		return (this.toString().equals(otherType.toString()));
 	}
 	
 	public boolean subTypeOf(SymbolType type)
 	{
-		if (this.equals(type))
+		if (this.compareType(type))
 			return true;
 		if ((this.isNullType()) && (type.isClassType()))
 			return true;

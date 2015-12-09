@@ -6,11 +6,24 @@ import java.util.ArrayList;
 public class SymbolTable {
 	
 	ArrayList<HashMap<String, SymbolType> > scopesHashTables;
-	
+	ArrayList<HashMap<String, SymbolType> > staticScopesHashTables;
+	ArrayList<HashMap<String, SymbolType> > current;
 	public SymbolTable()
 	{
 		scopesHashTables = new ArrayList<HashMap<String, SymbolType>>();
+		staticScopesHashTables = new ArrayList<HashMap<String, SymbolType>>();
+		current = scopesHashTables;
 		StartScope();
+	}
+	
+	public void StartStaticMode()
+	{
+		current = staticScopesHashTables;
+	}
+	
+	public void StartVirtualMode()
+	{
+		current = scopesHashTables;
 	}
 	
 	/*
@@ -18,7 +31,7 @@ public class SymbolTable {
 	 */
 	public boolean IsDeclaredInCurrentScope(String name)
 	{
-		return scopesHashTables.get(scopesHashTables.size()-1).get(name) != null;
+		return current.get(current.size()-1).get(name) != null;
 	}
 	/*
 	 * get the closest variable with the same name as the given name
@@ -26,9 +39,9 @@ public class SymbolTable {
 	public SymbolType GetClosestVarWithSameName(String name)
 	{
 		SymbolType data = null;
-		for(int i = scopesHashTables.size(); i >= 0; i--)
+		for(int i = current.size() - 1; i >= 0; i--)
 		{
-			data = scopesHashTables.get(i).get(name);
+			data = current.get(i).get(name);
 			if(data != null)
 			{
 				break;
@@ -43,6 +56,7 @@ public class SymbolTable {
 	public void StartScope()
 	{
 		scopesHashTables.add(new HashMap<String, SymbolType>());
+		staticScopesHashTables.add(new HashMap<String, SymbolType>());
 	}
 	
 	/*
@@ -51,11 +65,18 @@ public class SymbolTable {
 	public void ExitScope()
 	{
 		scopesHashTables.remove(scopesHashTables.size()-1);
+		staticScopesHashTables.remove(staticScopesHashTables.size()-1);
 	}
 	
 	public void InsertNewDecleration(String name, SymbolType data)
 	{
+		current.get(current.size() - 1).put(name, data);
+	}
+	
+	public void InsertNewDeclerationAsBothStaticAndVirtual(String name, SymbolType data)
+	{
 		scopesHashTables.get(scopesHashTables.size() - 1).put(name, data);
+		staticScopesHashTables.get(staticScopesHashTables.size() - 1).put(name, data);
 	}
 	
 }

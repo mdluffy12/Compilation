@@ -2,8 +2,6 @@ package slp;
 
 import java.util.*;
 
-import symbolTypes.TypeTable;
-
 /** Represents a state during the evaluation of a program. 
  */
 public class Environment {

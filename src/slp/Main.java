@@ -46,12 +46,7 @@ public class Main {
 			
 			System.out.println("Finished Printing the AST!!");
 			
-			SymbolTable table;
-			
-			symbolTypes.TypeTableMgr typeMgr = new symbolTypes.TypeTableMgr();
-			typeMgr.create((Program)root);
-			
-			SyntaxAnalyzer analyzer = new SyntaxAnalyzer(root, typeMgr.getTypeTable());
+			SyntaxAnalyzer analyzer = new SyntaxAnalyzer(root);
 			analyzer.Analyze();
 			
 			

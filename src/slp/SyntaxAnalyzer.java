@@ -1,6 +1,7 @@
 package slp;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import jdk.nashorn.internal.ir.BlockStatement;
 import symbolTypes.*;
@@ -110,7 +111,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 					SymbolType overriddenMethod = clsType.GetMemberFromMeOrClosestParent(met1.getName());
 					if(overriddenMethod != null)
 					{
-						if(overriddenMethod.toString().equals(memberType.toString()) == false)
+						if(overriddenMethod.compareType(memberType) == false)
 						throw new RuntimeException(member.getLine()+
 								":" + "cannot define the method " + memberType.getName() + " with the type " + memberType.toString() + 
 								" as an override to the type " + overriddenMethod.toString() + " the methods doesn't have the same signature or the other is a var");
@@ -209,8 +210,13 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 					": Size of array must be an integer number.");
 		}
 
-		// TODO: add array to symbol table
-		return new symbolTypes.ArrType(arr.getNodeType());
+		SymbolType t1 = arr.type.accept(this, env);
+		if(t1 instanceof ArrType)
+		{
+			ArrType art1 = (ArrType)t1;
+			return new ArrType(art1.getElemType(), art1.getDimension() + 1);
+		}
+		return new ArrType(t1, 1);
 	}
 
 	public SymbolType visit(UnaryOpExpr expr, Environment env) 
@@ -299,7 +305,8 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 				else
 				{
 					throw new RuntimeException(expr.getLine()+
-						": Invalid  usage of a binary operation <"+ expr.op.toString()+ "> with a non-integer expression.");
+						": Invalid  usage of a binary operation '"+ expr.op.toString()+
+						"' with a non-integer expression. expressions are left: " + type1.toString() + " right: " + type2.toString());
 				}
 			case LAND:
 			case LOR:
@@ -441,11 +448,18 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			SymbolType formalType = formal.accept(this, env);
 			env.symbolTable.InsertNewDecleration(formal.getName(), formalType);
 		}
-		
+		env.currentMethod = SymbolType.createMethType(method, env.symbolTable) ;
+		env.has_return_in_every_path = false;
 		for (Stmt s : method.getStatements().statements)
 		{
 			s.accept(this, env);
 		}
+		if(env.has_return_in_every_path == false && env.currentMethod.getRetType().isVoidType() == false)
+		{
+			throw new RuntimeException(method.getLine()+
+					": Function does not have a return in every path and it is not a void type");
+		}
+		env.currentMethod = null;
 		method.getType().accept(this, env);
 		env.symbolTable.ExitScope();
 	}
@@ -477,13 +491,21 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 					": Invalid expression inside if, condition is not of boolean type.");
 		}
 		
+		boolean has_return_before = env.has_return_in_every_path;
+		env.has_return_in_every_path = false;
 		stmt.getOperation().accept(this, env);
-
+		boolean has_return_in_if = env.has_return_in_every_path;
+		boolean has_return_in_else = false;
+		
 		// Validate "else" statement
 		if (stmt.hasElse()) 
 		{
+			env.has_return_in_every_path = false;
 			stmt.getElseOperation().accept(this, env);
+			has_return_in_else = env.has_return_in_every_path;
 		}
+		
+		env.has_return_in_every_path = (has_return_before) || (has_return_in_if && has_return_in_else);
 		return null;
 	}
 	
@@ -495,9 +517,11 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			throw new RuntimeException(stmt.getLine()+
 					": Invalid expression inside While, condition is not of boolean type.");
 		}
+		boolean has_return_before = env.has_return_in_every_path;
 		env.loop_counter += 1;
 		stmt.getOperation().accept(this, env);
 		env.loop_counter -= 1;
+		env.has_return_in_every_path = has_return_before;
 		return null;
 	}
 	
@@ -584,7 +608,6 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 
 	@Override
 	public SymbolType visit(IntLiteral intLit, Environment d) {
-		// TODO Auto-generated method stub
 		return new IntType();
 	}
 
@@ -593,7 +616,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 		SymbolType type1 = d.symbolTable.GetClosestVarWithSameName(nclss.classID);
 		if(type1 == null)
 		{
-			throw new RuntimeException(exprLength.getLine()+
+			throw new RuntimeException(nclss.getLine()+
 					": there is no class of with the name " + nclss.classID);
 		}
 		return type1;
@@ -601,22 +624,154 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 
 	@Override
 	public SymbolType visit(NullLiteral nllLit, Environment d) {
-		// TODO Auto-generated method stub
 		return new NullType();
 	}
 
 	@Override
 	public SymbolType visit(Return retStmt, Environment d) {
-		fixme
-		return null;
+		if(d.currentMethod == null)
+		{
+			throw new RuntimeException(retStmt.getLine()+
+					": using return outside of function is illegal! ");
+		}
+		//if we void function but we return something
+		if(d.currentMethod.getRetType().isVoidType() == true && retStmt.hasValue() == true)
+		{
+			throw new RuntimeException(retStmt.getLine()+
+					": return inside void function must not return an expression");
+		}
+		
+		if(d.currentMethod.getRetType().isVoidType() == false && retStmt.hasValue() == false)
+		{
+			throw new RuntimeException(retStmt.getLine()+
+					": return inside a function with return value of type " + d.currentMethod.getRetType().toString() + 
+					" but return returning type void");
+		}
+		
+		SymbolType returnExprType = retStmt.getValue().accept(this, d);
+		d.has_return_in_every_path = true;
+		if(returnExprType.subTypeOf(d.currentMethod.getRetType()) == false)
+		{
+			throw new RuntimeException(retStmt.getLine()+
+					": function and return type mismatch. type(return) " + returnExprType.toString() + 
+					" is not a subtype of function return type " + d.currentMethod.getRetType().toString());
+		}
+		return returnExprType;
 	}
 
 	@Override
 	public SymbolType visit(StaticFunctionCall sfc, Environment d) {
-		fixme
-		return null;
+		ClassType clssT1 = (ClassType) d.symbolTable.GetClosestVarWithSameName(sfc.classID);
+		if(clssT1 == null)
+		{
+			throw new RuntimeException(sfc.getLine()+
+					": name of the class used in the static function call does not exists " + sfc.classID);
+		}
+		SymbolType funcType = clssT1.GetMemberFromMeOrClosestParent(sfc.funcID);
+		if(funcType == null)
+		{
+			throw new RuntimeException(sfc.getLine()+
+					": class " + sfc.classID + " does not have a member named " + sfc.funcID);
+		}
+		if(!(funcType instanceof MethodType))
+		{
+			throw new RuntimeException(sfc.getLine()+
+					": class " + sfc.classID + " member name " + sfc.funcID + " is not a method! you cannot call it as if it is");
+		}
+		MethodType ftype1 = (MethodType)funcType;
+		ArrayList<SymbolType> parTypes = new ArrayList<SymbolType>();
+		ArgumentList l1 = sfc.args;
+		while(l1 != null)
+		{
+			parTypes.add(l1.data.accept(this, d));
+			l1 = l1.next;
+		}
+		if(parTypes.size() == 0)
+		{
+			parTypes.add(new VoidType());
+		}
+		SymbolType[] params = new SymbolType[parTypes.size()];
+		params = parTypes.toArray(params);
+		MethodType ftype2 = new MethodType(params, ftype1.getRetType(), true);
+		if(ftype1.getIsStatic() == false)
+		{
+			throw new RuntimeException(sfc.getLine()+
+					": class " + sfc.classID + " member name " + sfc.funcID + " is not a static but you call it as if it was");
+		}
+		
+		if(ftype2.subFunctionOf(ftype1) == false)
+		{
+			throw new RuntimeException(sfc.getLine()+
+					": class " + sfc.classID + " member name " + sfc.funcID +
+					"  is of type " + ftype1.toString() + " but expected function of type(because of the parameters) " + ftype2.toString());
+		}
+		return ftype2.getRetType();
 	}
 
+	@Override
+	public SymbolType visit(VirtualFunctionCall vfc, Environment d) {
+		SymbolType t1 = null;
+		if(vfc.prefixExpr == null)
+		{
+			t1 = d.symbolTable.GetClosestVarWithSameName("This");
+			if(t1 == null)
+			{
+				throw new RuntimeException(vfc.getLine()+
+						": cannot call virtual function inside static function");
+			}
+		}
+		else
+		{
+			t1 = vfc.prefixExpr.accept(this, d);
+			if(!(t1 instanceof ClassType))
+			{
+				throw new RuntimeException(vfc.getLine()+
+						": expression is not a class and has no functions. it is of type " + t1.toString());
+			}
+		}
+		
+		ClassType clssT1 = (ClassType)t1;
+		SymbolType funcType = clssT1.GetMemberFromMeOrClosestParent(vfc.funcID);
+		if(funcType == null)
+		{
+			throw new RuntimeException(vfc.getLine()+
+					": class " + clssT1.toString() + " does not have a member named " + vfc.funcID);
+		}
+		if(!(funcType instanceof MethodType))
+		{
+			throw new RuntimeException(vfc.getLine()+
+					": class " + clssT1.toString() + " member name " + vfc.funcID + " is not a method! you cannot call it as if it is");
+		}
+		MethodType ftype1 = (MethodType)funcType;
+		ArrayList<SymbolType> parTypes = new ArrayList<SymbolType>();
+		ArgumentList l1 = vfc.args;
+		while(l1 != null)
+		{
+			parTypes.add(l1.data.accept(this, d));
+			l1 = l1.next;
+		}
+		if(parTypes.size() == 0)
+		{
+			parTypes.add(new VoidType());
+		}
+		SymbolType[] params = new SymbolType[parTypes.size()];
+		params = parTypes.toArray(params);
+		MethodType ftype2 = new MethodType(params, ftype1.getRetType(), false);
+		if(ftype1.getIsStatic() == true)
+		{
+			throw new RuntimeException(vfc.getLine()+
+					": class " + clssT1.toString() + " member name " + vfc.funcID + " is  static but you call it as if it wasn't");
+		}
+		
+		if(ftype2.subFunctionOf(ftype1) == false)
+		{
+			throw new RuntimeException(vfc.getLine()+
+					": class " + clssT1.toString() + " member name " + vfc.funcID +
+					"  is of type " + ftype1.toString() + " but expected function of type(because of the parameters) " + ftype2.toString());
+		}
+		return ftype2.getRetType();
+	}
+	
 	@Override
 	public SymbolType visit(StringLiteral slit, Environment d) {
 		return new StringType();
@@ -624,8 +779,13 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 
 	@Override
 	public SymbolType visit(This thisStmt, Environment d) {
-		fixme
-		return null;
+		SymbolType thisType = d.symbolTable.GetClosestVarWithSameName("This");
+		if(thisType == null)
+		{
+			throw new RuntimeException(thisStmt.getLine()+
+					": 'this' could not been found at this context make sure you are inside virtual method of a class");
+		}
+		return thisType;
 	}
 
 	@Override
@@ -667,14 +827,25 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 	}
 
 	@Override
-	public SymbolType visit(VirtualFunctionCall vfc, Environment d) {
-		fixme
-		return null;
-	}
-
-	@Override
 	public SymbolType visit(ArrValueLocation arrValLoc, Environment d) {
-		fixme
-		return null;
+		SymbolType arrType = arrValLoc.baseExpression.accept(this, d);
+		SymbolType indType = arrValLoc.indexExpression.accept(this, d);
+		if(arrType.isArrType() == false)
+		{
+			throw new RuntimeException(arrValLoc.getLine()+
+					": trying to use [] on a not array object. object is from type " + arrType.toString());
+		}
+		if(indType.isIntType() == false)
+		{
+			throw new RuntimeException(arrValLoc.getLine()+
+					": trying to use [] with index of not type int. object is from type " + indType.toString());
+		}
+		
+		ArrType arrT = (ArrType)arrType;
+		if(arrT.getDimension() == 1) //it is the last dimension we should return a not array type
+		{
+			return arrT.getElemType();
+		}
+		return new ArrType(arrT.getElemType(), arrT.getDimension() - 1);
 	}
 }

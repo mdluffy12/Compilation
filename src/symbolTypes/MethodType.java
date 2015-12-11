@@ -36,5 +36,23 @@ public class MethodType extends SymbolType
 	{
 		return retType;
 	}
+	
+	public boolean getIsStatic()
+	{
+		return isStaticMethod;
+	}
+	
+	public boolean subFunctionOf(MethodType otherfunc)
+	{
+		boolean IsItSubFunction = true;
+		IsItSubFunction = IsItSubFunction && (otherfunc.isStaticMethod == this.isStaticMethod);
+		IsItSubFunction = IsItSubFunction && otherfunc.getRetType().subTypeOf(this.getRetType());
+		IsItSubFunction = IsItSubFunction && (otherfunc.getArgs().length == this.getArgs().length);
+		for(int i = 0; i < otherfunc.getArgs().length; i++)
+		{
+			IsItSubFunction = IsItSubFunction && this.getArgs()[i].subTypeOf(otherfunc.getArgs()[i]);
+		}
+		return IsItSubFunction;
+	}
 
 }

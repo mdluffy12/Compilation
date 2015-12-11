@@ -9,10 +9,7 @@ public abstract class ASTNode {
 	 * @param visitor A visitor.
 	 */
 	private int line; // somehow add line number here.....
-	
-	
-	
-	
+
 	public int getLine() 
 	{
 		return line;

@@ -20,7 +20,7 @@
 //src/slp.cup/cup-symbols-if=true
 //src/slp/slp.cup/cup-compact-red=false
 //src/slp/slp.cup/cup-debug=false
-//src/slp/slp.cup/cup-expected-conflicts=21
+//src/slp/slp.cup/cup-expected-conflicts=1
 //src/slp/slp.cup/cup-no-positions=false
 //src/slp/slp.cup/cup-no-scanner=false
 //src/slp/slp.cup/cup-non-terms=false

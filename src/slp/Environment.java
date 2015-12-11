@@ -14,4 +14,5 @@ public class Environment {
 	public SymbolTable symbolTable = new SymbolTable();
 	public symbolTypes.MethodType currentMethod = null;
 	public boolean has_return_in_every_path;
+	public String currentClassName;
 }

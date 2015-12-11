@@ -37,11 +37,92 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 	public void Analyze() {
 		Environment env = new Environment();
 		System.out.println("Inserting All Classess Information");
+		InsertLibraryClassInformation(env);
 		InsertAllClassInformation(root, env);
 		System.out.println("Checking Main");
 		containsMain(root);
 		System.out.println("Going Over Main Syntax Analysis");
 		root.accept(this, env);
+		System.out.println("Finished Syntax Analysis Successfully");
+	}
+	
+	private void InsertLibraryClassInformation(Environment env)
+	{
+		ClassType libType = new ClassType("Library", null);
+		env.symbolTable.InsertNewDeclerationAsBothStaticAndVirtual("Library", libType);
+		SymbolType retType;
+		SymbolType[] argsTypes;
+		
+		retType = new VoidType();
+		argsTypes = new SymbolType[1];
+		argsTypes[0] = new StringType();
+		libType.AddNewMember("println", new MethodType(argsTypes, retType, true));
+		
+		retType = new VoidType();
+		argsTypes = new SymbolType[1];
+		argsTypes[0] = new StringType();
+		libType.AddNewMember("print", new MethodType(argsTypes, retType, true));
+		
+		retType = new VoidType();
+		argsTypes = new SymbolType[1];
+		argsTypes[0] = new IntType();
+		libType.AddNewMember("printi", new MethodType(argsTypes, retType, true));
+		
+		retType = new VoidType();
+		argsTypes = new SymbolType[1];
+		argsTypes[0] = new BoolType();
+		libType.AddNewMember("printb", new MethodType(argsTypes, retType, true));
+		
+		retType = new IntType();
+		argsTypes = new SymbolType[1];
+		argsTypes[0] = new VoidType();
+		libType.AddNewMember("readi", new MethodType(argsTypes, retType, true));
+		
+		retType = new StringType();
+		argsTypes = new SymbolType[1];
+		argsTypes[0] = new VoidType();
+		libType.AddNewMember("readln", new MethodType(argsTypes, retType, true));
+
+		retType = new BoolType();
+		argsTypes = new SymbolType[1];
+		argsTypes[0] = new VoidType();
+		libType.AddNewMember("eof", new MethodType(argsTypes, retType, true));
+
+		retType = new IntType();
+		argsTypes = new SymbolType[2];
+		argsTypes[0] = new StringType();
+		argsTypes[1] = new IntType();
+		libType.AddNewMember("stoi", new MethodType(argsTypes, retType, true));
+
+		retType = new StringType();
+		argsTypes = new SymbolType[1];
+		argsTypes[0] = new IntType();
+		libType.AddNewMember("itos", new MethodType(argsTypes, retType, true));
+		
+		retType = new ArrType(new IntType(), 1);
+		argsTypes = new SymbolType[1];
+		argsTypes[0] = new StringType();
+		libType.AddNewMember("stoa", new MethodType(argsTypes, retType, true));
+
+		retType = new StringType();
+		argsTypes = new SymbolType[1];
+		argsTypes[0] = new ArrType(new IntType(), 1);
+		libType.AddNewMember("atos", new MethodType(argsTypes, retType, true));
+		
+		retType = new IntType();
+		argsTypes = new SymbolType[1];
+		argsTypes[0] = new IntType();
+		libType.AddNewMember("random", new MethodType(argsTypes, retType, true));
+		
+		retType = new IntType();
+		argsTypes = new SymbolType[1];
+		argsTypes[0] = new VoidType();
+		libType.AddNewMember("time", new MethodType(argsTypes, retType, true));
+		
+		retType = new VoidType();
+		argsTypes = new SymbolType[1];
+		argsTypes[0] = new IntType();
+		libType.AddNewMember("exit", new MethodType(argsTypes, retType, true));
 	}
 	
 	private void InsertAllClassInformation(Program prog1, Environment env) {
@@ -350,7 +431,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 		env.symbolTable.StartScope();
 		ClassType classType = (ClassType) env.symbolTable.GetClosestVarWithSameName(classId);
 		env.symbolTable.InsertNewDecleration("This", classType);
-		
+		env.currentClassName = classId;
 		for (ClassMember member : cls.getMembers()) {
 
 			// Initialize needed parameters:
@@ -647,16 +728,21 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 					": return inside a function with return value of type " + d.currentMethod.getRetType().toString() + 
 					" but return returning type void");
 		}
-		
-		SymbolType returnExprType = retStmt.getValue().accept(this, d);
 		d.has_return_in_every_path = true;
-		if(returnExprType.subTypeOf(d.currentMethod.getRetType()) == false)
+		
+		if(retStmt.hasValue())
 		{
-			throw new RuntimeException(retStmt.getLine()+
-					": function and return type mismatch. type(return) " + returnExprType.toString() + 
-					" is not a subtype of function return type " + d.currentMethod.getRetType().toString());
+			SymbolType returnExprType = retStmt.getValue().accept(this, d);
+			
+			if(returnExprType.subTypeOf(d.currentMethod.getRetType()) == false)
+			{
+				throw new RuntimeException(retStmt.getLine()+
+						": function and return type mismatch. type(return) " + returnExprType.toString() + 
+						" is not a subtype of function return type " + d.currentMethod.getRetType().toString());
+			}
+			return returnExprType;
 		}
-		return returnExprType;
+		return new VoidType();
 	}
 
 	@Override
@@ -711,13 +797,15 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 	@Override
 	public SymbolType visit(VirtualFunctionCall vfc, Environment d) {
 		SymbolType t1 = null;
+		boolean bMustBeStatic = false;
 		if(vfc.prefixExpr == null)
 		{
 			t1 = d.symbolTable.GetClosestVarWithSameName("This");
 			if(t1 == null)
 			{
-				throw new RuntimeException(vfc.getLine()+
-						": cannot call virtual function inside static function");
+				//maybe its a static function call from a static function (implicit one without CLASSNAME.
+				t1 = d.symbolTable.GetClosestVarWithSameName(d.currentClassName);
+				bMustBeStatic = true;
 			}
 		}
 		else
@@ -756,17 +844,25 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 		}
 		SymbolType[] params = new SymbolType[parTypes.size()];
 		params = parTypes.toArray(params);
-		MethodType ftype2 = new MethodType(params, ftype1.getRetType(), false);
+		MethodType ftype2 = new MethodType(params, ftype1.getRetType(), ftype1.getIsStatic());
 		if(ftype1.getIsStatic() == true)
 		{
+			if(vfc.prefixExpr != null)
+			{
+				throw new RuntimeException(vfc.getLine()+
+						": class " + clssT1.toString() + " member name " + vfc.funcID + " is  static but you call it as if it wasn't");
+			}
+		}
+		else if(bMustBeStatic)
+		{
 			throw new RuntimeException(vfc.getLine()+
-					": class " + clssT1.toString() + " member name " + vfc.funcID + " is  static but you call it as if it wasn't");
+					": cannot call virtual function inside static function");
 		}
 		
 		if(ftype2.subFunctionOf(ftype1) == false)
 		{
 			throw new RuntimeException(vfc.getLine()+
-					": class " + clssT1.toString() + " member name " + vfc.funcID +
+					": class " + clssT1.toString() + " name " + vfc.funcID +
 					"  is of type " + ftype1.toString() + " but expected function of type(because of the parameters) " + ftype2.toString());
 		}
 		return ftype2.getRetType();
@@ -819,6 +915,15 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			t1 = d.symbolTable.GetClosestVarWithSameName(varValLoc.varID);
 			if(t1 == null)
 			{
+				ClassType clsThis = (ClassType) d.symbolTable.GetClosestVarWithSameName("This"); //check maybe it is implicit this var
+				if(clsThis != null)
+				{
+					t1 = clsThis.GetMemberFromMeOrClosestParent(varValLoc.varID);
+					if(t1 != null)
+					{
+						return t1;
+					}
+				}
 				throw new RuntimeException(varValLoc.getLine()+
 						": no variable with the name " + varValLoc.varID + " exists");
 			}

@@ -8,9 +8,8 @@ import java.util.ArrayList;
 public class StmtList extends ASTNode {
 	public final List<Stmt> statements = new ArrayList<Stmt>();
 	
-	public StmtList(Stmt stmt, int line) {
+	public StmtList(int line) {
 		super(line);
-		statements.add(stmt);
 	}
 
 	/** Adds a statement to the tail of the list.

@@ -55,6 +55,43 @@ public class Main {
 	      e.printStackTrace();
 	    }
 	    
+	    p = Paths.get("Input/legal_files");
+	    fv = new SimpleFileVisitor<Path>() {
+	      @Override
+	      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+	          throws IOException {
+	    	  try {
+
+	  			// Parse the input file
+	  			FileReader txtFile = new FileReader(file.toString());
+	  			Lexer scanner = new Lexer(txtFile);
+	  			Parser parser = new Parser(scanner);
+	  			parser.printTokens = false;
+	  			
+	  			Symbol parseSymbol = parser.parse();
+	  			ASTNode root = (ASTNode) parseSymbol.value;
+	  			
+	  			// Pretty-print the program to System.out
+	  			PrettyPrinter printer = new PrettyPrinter(root);
+	  			//printer.print();
+	  			
+	  			SyntaxAnalyzer analyzer = new SyntaxAnalyzer(root);
+	  			analyzer.Analyze();
+	  			System.out.println(file.toString() + " PASSED!");
+	  			
+	  		} catch (Exception e) {
+	  			System.out.println(file.toString() + " FAILED!");
+	  		}
+	        return FileVisitResult.CONTINUE;
+	      }
+	    };
+	    
+	    try {
+		      Files.walkFileTree(p, fv);
+		    } catch (IOException e) {
+		      e.printStackTrace();
+		    }
+	    
 	    
 		try {
 			if (args.length == 0) {

@@ -120,6 +120,14 @@ COMMENT_MULTI_LINE	= \/\* ([^\*] | \*[^\/])*\*? \*\/
 					
 					
 {NUMBER}			{
+						try
+						{
+							Integer x = new Integer(yytext());
+						}
+						catch(Exception e)
+						{
+							throw new RuntimeException("integer does not fit " + (yyline+1) + " : '" + yytext() + "'");
+						}
 						return token(sym.INTEGER, new Integer(yytext()));
 					}   
 {IDENTIFIER}		{

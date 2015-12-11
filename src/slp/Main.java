@@ -1,6 +1,9 @@
 package slp;
 
 import java.io.*;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+
 import java_cup.runtime.*;
 
 /** The entry point of the SLP (Straight Line Program) application.
@@ -14,6 +17,45 @@ public class Main {
 	 * @param args Should be the name of the file containing an SLP.
 	 */
 	public static void main(String[] args) {
+		Path p = Paths.get("Input/illegal_files");
+	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+	      @Override
+	      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+	          throws IOException {
+	    	  try {
+
+	  			// Parse the input file
+	  			FileReader txtFile = new FileReader(file.toString());
+	  			Lexer scanner = new Lexer(txtFile);
+	  			Parser parser = new Parser(scanner);
+	  			parser.printTokens = false;
+	  			
+	  			Symbol parseSymbol = parser.parse();
+	  			ASTNode root = (ASTNode) parseSymbol.value;
+	  			
+	  			// Pretty-print the program to System.out
+	  			PrettyPrinter printer = new PrettyPrinter(root);
+	  			//printer.print();
+	  			
+	  			SyntaxAnalyzer analyzer = new SyntaxAnalyzer(root);
+	  			analyzer.Analyze();
+	  			System.out.println(file.toString() + " FAILED!");
+	  			
+	  			
+	  		} catch (Exception e) {
+	  			System.out.println(file.toString() + " PASSED!");
+	  		}
+	        return FileVisitResult.CONTINUE;
+	      }
+	    };
+
+	    try {
+	      Files.walkFileTree(p, fv);
+	    } catch (IOException e) {
+	      e.printStackTrace();
+	    }
+	    
+	    
 		try {
 			if (args.length == 0) {
 				System.out.println("Error: Missing input file argument!");

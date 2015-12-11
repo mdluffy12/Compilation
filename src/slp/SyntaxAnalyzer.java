@@ -36,14 +36,14 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 	 */
 	public void Analyze() {
 		Environment env = new Environment();
-		System.out.println("Inserting All Classess Information");
+		//System.out.println("Inserting All Classess Information");
 		InsertLibraryClassInformation(env);
 		InsertAllClassInformation(root, env);
-		System.out.println("Checking Main");
+		//System.out.println("Checking Main");
 		containsMain(root);
-		System.out.println("Going Over Main Syntax Analysis");
+		//System.out.println("Going Over Main Syntax Analysis");
 		root.accept(this, env);
-		System.out.println("Finished Syntax Analysis Successfully");
+		//System.out.println("Finished Syntax Analysis Successfully");
 	}
 	
 	private void InsertLibraryClassInformation(Environment env)

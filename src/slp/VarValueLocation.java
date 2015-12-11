@@ -6,15 +6,15 @@ public class VarValueLocation extends ValueLocation {
 	public boolean UseVarExpr;
 	public Expr varExpression;
 	
-	public VarValueLocation(String varID)
+	public VarValueLocation(String varID, int line)
 	{
-		this.varID = varID;
+		this(null, varID, line);
 		this.UseVarExpr = false;
-		this.varExpression = null;
 	}
 	
-	public VarValueLocation(Expr varExpression, String varID)
+	public VarValueLocation(Expr varExpression, String varID, int line)
 	{
+		super(line);
 		this.varID = varID;
 		this.UseVarExpr = true;
 		this.varExpression = varExpression;

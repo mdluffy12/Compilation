@@ -2,8 +2,9 @@ package slp;
 
 public class StringLiteral extends Literal {
 	public String value;
-	public StringLiteral(String value)
+	public StringLiteral(String value, int line)
 	{
+		super(line);
 		this.value = value;
 	}
 	

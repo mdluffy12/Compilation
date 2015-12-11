@@ -9,8 +9,9 @@ public abstract class ClassMethod extends ClassMember {
 	protected List<MethodFormal> formals;
 	protected StmtList statements;
 
-	protected ClassMethod(Type type, String name, List<MethodFormal> formals, StmtList statements)
+	protected ClassMethod(Type type, String name, List<MethodFormal> formals, StmtList statements, int line)
 	{
+		super(line);
 		this.type = type;
 		this.name = name;
 		this.formals = formals;

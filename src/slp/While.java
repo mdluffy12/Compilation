@@ -3,7 +3,8 @@ package slp;
 public class While extends Stmt {
 	private Expr cond;
 	private Stmt op;
-	public While(Expr cond,Stmt op){
+	public While(Expr cond,Stmt op, int line){
+		super(line);
 		this.cond=cond;
 		this.op=op;
 	}

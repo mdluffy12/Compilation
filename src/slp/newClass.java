@@ -2,8 +2,9 @@ package slp;
 
 public class newClass extends Expr {
 	public String classID;
-	public newClass(String classID)
+	public newClass(String classID, int line)
 	{
+		super(line);
 		this.classID = classID;
 	}
 	@Override

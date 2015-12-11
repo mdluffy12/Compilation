@@ -8,9 +8,9 @@ public class VirtualMethod extends ClassMethod {
 		visitor.visit(this);
 	}
 
-	public VirtualMethod(Type type, String name, List<MethodFormal> formals, StmtList statements) 
+	public VirtualMethod(Type type, String name, List<MethodFormal> formals, StmtList statements, int line) 
 	{
-		super(type, name, formals, statements);
+		super(type, name, formals, statements, line);
 	}
 
 	/** Accepts a propagating visitor parameterized by two types.

@@ -13,8 +13,9 @@ public class Program extends ASTNode
 		visitor.visit(this);
 	}
 
-	public Program(List<ICClass> classes) 
+	public Program(List<ICClass> classes, int line) 
 	{
+		super(line);
 		this.classes = classes;
 	}
 

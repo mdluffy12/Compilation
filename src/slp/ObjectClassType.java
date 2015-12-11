@@ -9,8 +9,9 @@ public class ObjectClassType extends Type
 		visitor.visit(this);
 	}
 
-	public ObjectClassType(String name) 
+	public ObjectClassType(int line, String name) 
 	{
+		super(line);
 		this.name = name;
 	}
 

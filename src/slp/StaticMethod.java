@@ -22,9 +22,9 @@ public class StaticMethod extends ClassMethod
 	 * @param statements
 	 *            List of method's statements.
 	 */
-	public StaticMethod(Type type, String name, List<MethodFormal> formals, StmtList statements) 
+	public StaticMethod(Type type, String name, List<MethodFormal> formals, StmtList statements, int line) 
 	{
-		super(type, name, formals, statements);
+		super(type, name, formals, statements, line);
 	}
 	
 	/** Accepts a propagating visitor parameterized by two types.

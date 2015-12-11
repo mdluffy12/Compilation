@@ -1,7 +1,9 @@
 package slp;
 
 public class Continue extends Stmt {
-	public Continue(){}
+	public Continue(int line){
+		super(line);
+	}
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);

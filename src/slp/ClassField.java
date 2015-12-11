@@ -12,7 +12,8 @@ public class ClassField extends ClassMember {
 		visitor.visit(this);
 	}
 	
-	public ClassField(Type fieldType, String fieldName) {
+	public ClassField(Type fieldType, String fieldName, int line) {
+		super(line);
 		this.fieldType = fieldType;
 		this.fieldName = fieldName;
 	}

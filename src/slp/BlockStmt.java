@@ -3,8 +3,9 @@ package slp;
 public class BlockStmt extends Stmt {
 
 	public StmtList m_stmtList;
-	public BlockStmt(StmtList stmtList)
+	public BlockStmt(StmtList stmtList, int line)
 	{
+		super(line);
 		m_stmtList = stmtList;
 	}
 	

@@ -5,8 +5,9 @@ public class ArgumentList extends ASTNode {
 	public ArgumentList next;
 	public Expr data;
 	
-	public ArgumentList(Expr data, ArgumentList next)
+	public ArgumentList(Expr data, ArgumentList next, int line)
 	{
+		super(line);
 		this.next = next;
 		this.data = data;
 	}

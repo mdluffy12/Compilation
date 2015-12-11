@@ -15,6 +15,11 @@ public abstract class ASTNode {
 		return line;
 	}
 	
+	protected ASTNode(int line)
+	{
+		this.line = line;
+	}
+	
 	public abstract void accept(Visitor visitor);
 	
 	/** Accepts a propagating visitor parameterized by two types.

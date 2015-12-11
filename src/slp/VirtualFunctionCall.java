@@ -4,17 +4,16 @@ public class VirtualFunctionCall extends FunctionCall {
 	public Expr prefixExpr;
 	public String funcID;
 	public ArgumentList args;
-	public VirtualFunctionCall(String funcID, ArgumentList args, Expr prefix)
+	public VirtualFunctionCall(String funcID, ArgumentList args, Expr prefix, int line)
 	{
+		super(line);
 		this.prefixExpr = prefix;
 		this.funcID = funcID;
 		this.args = args;
 	}
-	public VirtualFunctionCall(String funcID, ArgumentList args)
+	public VirtualFunctionCall(String funcID, ArgumentList args, int line)
 	{
-		this.prefixExpr = null;
-		this.funcID = funcID;
-		this.args = args;
+		this(funcID, args, null, line);
 	}
 	
 

@@ -8,15 +8,16 @@ public class ICClass extends ASTNode
 	private String superClassName = null;
 	private List<ClassMember> members;
 
-	public ICClass(String name, List<ClassMember> members)
+	public ICClass(String name, List<ClassMember> members, int line)
 	{
+		super(line);
 		this.name = name;
 		this.members = members;
 	}
 
-	public ICClass(String name, String superClassName, List<ClassMember> members)
+	public ICClass(String name, String superClassName, List<ClassMember> members, int line)
 	{
-		this(name, members);
+		this(name, members, line);
 		this.superClassName = superClassName;
 	}
 	

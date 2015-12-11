@@ -4,7 +4,8 @@ public class Return extends Stmt {
 
 	private Expr value = null;
 
-	public Return(Expr e) {
+	public Return(Expr e, int line) {
+		super(line);
 		this.value = e;
 	}
 

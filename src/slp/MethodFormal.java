@@ -10,8 +10,9 @@ public class MethodFormal extends ASTNode
 		visitor.visit(this);
 	}
 
-	public MethodFormal(Type type, String name)
+	public MethodFormal(Type type, String name, int line)
 	{
+		super(line);
 		this.type = type;
 		this.name = name;
 	}

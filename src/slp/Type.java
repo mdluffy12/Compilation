@@ -11,8 +11,9 @@ public abstract class Type extends ASTNode {
 	 */
 	private int dim = 0;
 
-	protected Type() 
+	protected Type(int line) 
 	{
+		super(line);
 	}
 
 	public abstract String getName();

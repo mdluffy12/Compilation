@@ -4,8 +4,9 @@ public class ArrValueLocation extends ValueLocation {
 	public Expr baseExpression;
 	public Expr indexExpression;
 	
-	public ArrValueLocation(Expr baseExpr, Expr indExpr)
+	public ArrValueLocation(Expr baseExpr, Expr indExpr, int line)
 	{
+		super(line);
 		this.baseExpression = baseExpr;
 		this.indexExpression = indExpr;
 	}

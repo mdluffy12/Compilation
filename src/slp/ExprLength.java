@@ -3,7 +3,8 @@ package slp;
 public class ExprLength  extends Expr{
 	public final Expr e;
 	
-	public ExprLength(Expr e) {
+	public ExprLength(Expr e, int line) {
+		super(line);
 		this.e = e;
 	}
 	

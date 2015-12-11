@@ -4,8 +4,9 @@ public class newArray extends Expr{
 	public final Type type;
 	public final Expr length;
 	
-	public newArray(Type type, Expr length)
+	public newArray(Type type, Expr length, int line)
 	{
+		super(line);
 		this.type = type;
 		this.length = length;
 	}

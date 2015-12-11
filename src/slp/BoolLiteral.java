@@ -2,8 +2,9 @@ package slp;
 
 public class BoolLiteral extends Literal {
 		public boolean value;
-		public BoolLiteral(boolean bValue)
+		public BoolLiteral(boolean bValue, int line)
 		{
+			super(line);
 			this.value = bValue;
 		}
 		

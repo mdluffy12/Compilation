@@ -65,19 +65,19 @@ public abstract class SymbolType {
 	{
 		if (dataTypeName == slp.DataTypes.INT.getDescription()) 
 		{
-			return intType;
+			return new IntType();
 		} 
 		else if (dataTypeName == slp.DataTypes.STRING.getDescription()) 
 		{
-			return stringType;
+			return new StringType();
 		} 
 		else if (dataTypeName == slp.DataTypes.VOID.getDescription()) 
 		{
-			return voidType;
-		} 
+			return new VoidType();
+		}
 		else if (dataTypeName == slp.DataTypes.BOOLEAN.getDescription()) 
 		{
-			return boolType;
+			return new BoolType();
 		} 
 		else 
 		{

@@ -53,75 +53,75 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 		SymbolType retType;
 		SymbolType[] argsTypes;
 		
-		retType = new VoidType();
+		retType = new VoidType(true);
 		argsTypes = new SymbolType[1];
-		argsTypes[0] = new StringType();
+		argsTypes[0] = new StringType(true);
 		libType.AddNewMember("println", new MethodType(argsTypes, retType, true));
 		
-		retType = new VoidType();
+		retType = new VoidType(true);
 		argsTypes = new SymbolType[1];
-		argsTypes[0] = new StringType();
+		argsTypes[0] = new StringType(true);
 		libType.AddNewMember("print", new MethodType(argsTypes, retType, true));
 		
-		retType = new VoidType();
+		retType = new VoidType(true);
 		argsTypes = new SymbolType[1];
-		argsTypes[0] = new IntType();
+		argsTypes[0] = new IntType(true);
 		libType.AddNewMember("printi", new MethodType(argsTypes, retType, true));
 		
-		retType = new VoidType();
+		retType = new VoidType(true);
 		argsTypes = new SymbolType[1];
-		argsTypes[0] = new BoolType();
+		argsTypes[0] = new BoolType(true);
 		libType.AddNewMember("printb", new MethodType(argsTypes, retType, true));
 		
-		retType = new IntType();
+		retType = new IntType(true);
 		argsTypes = new SymbolType[1];
-		argsTypes[0] = new VoidType();
+		argsTypes[0] = new VoidType(true);
 		libType.AddNewMember("readi", new MethodType(argsTypes, retType, true));
 		
-		retType = new StringType();
+		retType = new StringType(true);
 		argsTypes = new SymbolType[1];
-		argsTypes[0] = new VoidType();
+		argsTypes[0] = new VoidType(true);
 		libType.AddNewMember("readln", new MethodType(argsTypes, retType, true));
 
-		retType = new BoolType();
+		retType = new BoolType(true);
 		argsTypes = new SymbolType[1];
-		argsTypes[0] = new VoidType();
+		argsTypes[0] = new VoidType(true);
 		libType.AddNewMember("eof", new MethodType(argsTypes, retType, true));
 
-		retType = new IntType();
+		retType = new IntType(true);
 		argsTypes = new SymbolType[2];
-		argsTypes[0] = new StringType();
-		argsTypes[1] = new IntType();
+		argsTypes[0] = new StringType(true);
+		argsTypes[1] = new IntType(true);
 		libType.AddNewMember("stoi", new MethodType(argsTypes, retType, true));
 
-		retType = new StringType();
+		retType = new StringType(true);
 		argsTypes = new SymbolType[1];
-		argsTypes[0] = new IntType();
+		argsTypes[0] = new IntType(true);
 		libType.AddNewMember("itos", new MethodType(argsTypes, retType, true));
 		
-		retType = new ArrType(new IntType(), 1);
+		retType = new ArrType(new IntType(true), 1);
 		argsTypes = new SymbolType[1];
-		argsTypes[0] = new StringType();
+		argsTypes[0] = new StringType(true);
 		libType.AddNewMember("stoa", new MethodType(argsTypes, retType, true));
 
-		retType = new StringType();
+		retType = new StringType(true);
 		argsTypes = new SymbolType[1];
-		argsTypes[0] = new ArrType(new IntType(), 1);
+		argsTypes[0] = new ArrType(new IntType(true), 1);
 		libType.AddNewMember("atos", new MethodType(argsTypes, retType, true));
 		
-		retType = new IntType();
+		retType = new IntType(true);
 		argsTypes = new SymbolType[1];
-		argsTypes[0] = new IntType();
+		argsTypes[0] = new IntType(true);
 		libType.AddNewMember("random", new MethodType(argsTypes, retType, true));
 		
-		retType = new IntType();
+		retType = new IntType(true);
 		argsTypes = new SymbolType[1];
-		argsTypes[0] = new VoidType();
+		argsTypes[0] = new VoidType(true);
 		libType.AddNewMember("time", new MethodType(argsTypes, retType, true));
 		
-		retType = new VoidType();
+		retType = new VoidType(true);
 		argsTypes = new SymbolType[1];
-		argsTypes[0] = new IntType();
+		argsTypes[0] = new IntType(true);
 		libType.AddNewMember("exit", new MethodType(argsTypes, retType, true));
 	}
 	
@@ -285,7 +285,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			throw new RuntimeException(stmt.rhs.getLine()+
 					": "+stmt.rhs.toString()+" is not initialzied.");
 		}
-		
+		type1.initialize();
 		return null;
 	}
 
@@ -301,9 +301,9 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 		if(t1 instanceof ArrType)
 		{
 			ArrType art1 = (ArrType)t1;
-			return new ArrType(art1.getElemType(), art1.getDimension() + 1);
+			return new ArrType(art1.getElemType(), art1.getDimension() + 1, true);
 		}
-		return new ArrType(t1, 1);
+		return new ArrType(t1, 1,true);
 	}
 
 	public SymbolType visit(UnaryOpExpr expr, Environment env) 
@@ -472,6 +472,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 				{
 					throw new RuntimeException(field.getLine()+": field "+ field.getName() +" is declared more than once");
 				}
+				fieldType.initialize();
 				env.symbolTable.InsertNewDecleration(fieldId, fieldType);
 				
 				field.accept(this, env);
@@ -522,6 +523,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 		if (!env.symbolTable.IsDeclaredInCurrentScope(formalId))
 		{
 			env.symbolTable.InsertNewDecleration(formalId, formalType);
+			formalType.initialize();
 			return formalType;
 		}
 		else
@@ -693,10 +695,18 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			throw new RuntimeException(lvar.getLine()+
 					": it is not allowed to define a function and a variable with the same name '" + lvar.getName() + "'");
 		}
+		int roni = 0;
+		if (lvar.getName().equals("dana")){
+			roni++;
+		}
+		
+		
 		SymbolType varType = lvar.getType().accept(this, env);
 		env.symbolTable.InsertNewDecleration(lvar.getName(), varType);
+		System.out.println("Init " + lvar.getName() + roni);
 		if(lvar.hasInitValue())
 		{
+			System.out.println("Init " + lvar.getName() + " val: " + lvar.getInitValue());
 			SymbolType initValType = lvar.getInitValue().accept(this, env);
 			if(initValType.subTypeOf(varType) == false)
 			{
@@ -742,6 +752,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			throw new RuntimeException(nclss.getLine()+
 					": there is no class of with the name " + nclss.classID);
 		}
+		type1.initialize();
 		return type1;
 	}
 
@@ -892,7 +903,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 		}
 		SymbolType[] params = new SymbolType[parTypes.size()];
 		params = parTypes.toArray(params);
-		MethodType ftype2 = new MethodType(params, ftype1.getRetType(), ftype1.getIsStatic());
+		MethodType ftype2 = new MethodType(params, ftype1.getRetType(), ftype1.getIsStatic(), true);
 		if(ftype1.getIsStatic() == true)
 		{
 			if(vfc.prefixExpr != null)
@@ -999,6 +1010,6 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 		{
 			return arrT.getElemType();
 		}
-		return new ArrType(arrT.getElemType(), arrT.getDimension() - 1);
+		return new ArrType(arrT.getElemType(), arrT.getDimension() - 1, true);
 	}
 }

@@ -279,6 +279,13 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			throw new RuntimeException(stmt.getLine()+
 					": can not perform assignment from type "+type2.toString() +" to type "+type1.toString());
 		}
+		
+		if(!type2.isInitialized())
+		{
+			throw new RuntimeException(stmt.rhs.getLine()+
+					": "+stmt.rhs.toString()+" is not initialzied.");
+		}
+		
 		return null;
 	}
 
@@ -308,12 +315,17 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			throw new RuntimeException(expr.getLine()+
 					": can not perform unary operation on a VOID type parameter.");
 		}
+		if(!type.isInitialized())
+		{
+			throw new RuntimeException(expr.getLine()+
+					": "+expr.operand.toString()+" is not initialzied.");
+		}
 		switch (expr.op) 
 		{
 			case UMINUS:
 				if (type.isIntType()) 
 				{
-					return new symbolTypes.IntType();
+					return new symbolTypes.IntType(true);
 				}
 				else
 				{
@@ -323,7 +335,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			case LNEG:
 				if (type.isBoolType())
 				{
-					return new symbolTypes.BoolType();
+					return new symbolTypes.BoolType(true);
 				}
 				else
 				{
@@ -345,17 +357,28 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			throw new RuntimeException(expr.getLine()+
 					": can not perform binary operation on a VOID type parameter.");
 		}
+		
+		if(!type1.isInitialized())
+		{
+			throw new RuntimeException(expr.getLine()+
+					": "+expr.lhs.toString()+" is not initialzied.");
+		}
+		if(!type2.isInitialized())
+		{
+			throw new RuntimeException(expr.getLine()+
+					": "+expr.rhs.toString()+" is not initialzied.");
+		}
 
 		switch (expr.op) 
 		{
 			case PLUS:
 				if (type1.isIntType() && type2.isIntType()) 
 				{
-					return new symbolTypes.IntType();
+					return new symbolTypes.IntType(true);
 				}
 				else if (type1.isStringType() && type2.isStringType())
 				{
-					return new symbolTypes.StringType();
+					return new symbolTypes.StringType(true);
 				}
 				else
 				{
@@ -367,7 +390,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			case DIV:
 			case MOD:
 				if (type1.isIntType() && type2.isIntType()) {
-					return new symbolTypes.IntType();
+					return new symbolTypes.IntType(true);
 				}
 				else
 				{
@@ -380,7 +403,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			case GE:
 				if (type1.isIntType() && type2.isIntType())
 				{
-					return new symbolTypes.BoolType();
+					return new symbolTypes.BoolType(true);
 				}
 				else
 				{
@@ -392,7 +415,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			case LOR:
 				if (type1.isBoolType() && type2.isBoolType())
 				{
-					return new symbolTypes.BoolType();
+					return new symbolTypes.BoolType(true);
 				}
 				else
 				{
@@ -402,11 +425,11 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			case NEQUAL:
 			case EQUAL:
 				if (type1.equals(type2))
-					return new symbolTypes.BoolType();
+					return new symbolTypes.BoolType(true);
 				if ((type1.isNullable()) && (type2.isNullType()) || (type1.isNullType()) && (type2.isNullable()))
-					return new symbolTypes.BoolType();
+					return new symbolTypes.BoolType(true);
 				if ((type1.subTypeOf(type2)) || (type2.subTypeOf(type1)))
-					return new symbolTypes.BoolType();
+					return new symbolTypes.BoolType(true);
 				throw new RuntimeException(expr.getLine()+
 						": Invalid usage of a binary operation <"+ expr.op.toString()+ "> with a mismatching expression.");
 			default:
@@ -572,6 +595,12 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			throw new RuntimeException(stmt.getLine()+
 					": Invalid expression inside if, condition is not of boolean type.");
 		}
+		if (!sym_type.isInitialized())
+		{
+			throw new RuntimeException(stmt.getCondition().getLine()+
+					": "+stmt.getCondition().toString()+" is not initialzied.");
+
+		}
 		
 		boolean has_return_before = env.has_return_in_every_path;
 		env.has_return_in_every_path = false;
@@ -598,6 +627,12 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 		{
 			throw new RuntimeException(stmt.getLine()+
 					": Invalid expression inside While, condition is not of boolean type.");
+		}
+		if (!sym_type.isInitialized())
+		{
+			throw new RuntimeException(stmt.getCondition().getLine()+
+					": "+stmt.getCondition().toString()+" is not initialzied.");
+
 		}
 		boolean has_return_before = env.has_return_in_every_path;
 		env.loop_counter += 1;
@@ -674,7 +709,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 
 	@Override
 	public SymbolType visit(BoolLiteral bl, Environment d) {
-		return new BoolType();
+		return new BoolType(true);
 	}
 
 	@Override
@@ -685,12 +720,18 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			throw new RuntimeException(exprLength.getLine()+
 					": Length is only accepted to use as part of an array! and this expression is not an array it is of type " + type1.toString());
 		}
-		return new IntType();
+		if(!type1.isInitialized())
+		{
+
+			throw new RuntimeException(exprLength.e.getLine()+
+					": "+exprLength.e.toString()+" is not initialzied.");
+		}
+		return new IntType(true);
 	}
 
 	@Override
 	public SymbolType visit(IntLiteral intLit, Environment d) {
-		return new IntType();
+		return new IntType(true);
 	}
 
 	@Override
@@ -706,7 +747,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 
 	@Override
 	public SymbolType visit(NullLiteral nllLit, Environment d) {
-		return new NullType();
+		return new NullType(true);
 	}
 
 	@Override
@@ -740,6 +781,12 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 				throw new RuntimeException(retStmt.getLine()+
 						": function and return type mismatch. type(return) " + returnExprType.toString() + 
 						" is not a subtype of function return type " + d.currentMethod.getRetType().toString());
+			}
+			if (!returnExprType.isInitialized())
+			{
+				throw new RuntimeException(retStmt.getLine()+
+						": "+retStmt.getValue().toString()+" is not initialzied.");
+
 			}
 			return returnExprType;
 		}
@@ -871,7 +918,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 	
 	@Override
 	public SymbolType visit(StringLiteral slit, Environment d) {
-		return new StringType();
+		return new StringType(true);
 	}
 
 	@Override

@@ -10,7 +10,12 @@ public class ClassType extends SymbolType
 
 	public ClassType(String name, ClassType superClass)
 	{
-		super("ClassType");
+		this(name, superClass, false);
+	}
+	
+	public ClassType(String name, ClassType superClass, boolean isInitialized)
+	{
+		super("ClassType", isInitialized);
 		this.name = name;
 		this.superClass = superClass;
 		this.classMembersAndFucntions = new HashMap<String, SymbolType>();

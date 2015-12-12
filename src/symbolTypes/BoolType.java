@@ -4,7 +4,11 @@ public class BoolType extends SymbolType
 {
 	public BoolType()
 	{
-		super("BoolType");
+		this(false);
+	}
+	public BoolType(boolean isInitialized)
+	{
+		super("BoolType", isInitialized);
 	}
 	
 	@Override

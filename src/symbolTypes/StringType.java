@@ -4,7 +4,12 @@ public class StringType extends SymbolType
 {
 	public StringType()
 	{
-		super("StringType");
+		this(false);
+	}
+	
+	public StringType(boolean isInitialized)
+	{
+		super("StringType", isInitialized);
 	}
 	
 	@Override

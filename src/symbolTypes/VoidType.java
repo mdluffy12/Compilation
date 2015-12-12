@@ -4,7 +4,12 @@ public class VoidType extends SymbolType
 {
 	public VoidType()
 	{
-		super("VoidType");
+		this(false);
+	}
+	
+	public VoidType(boolean isInitialized)
+	{
+		super("VoidType", isInitialized);
 	}
 	
 	@Override

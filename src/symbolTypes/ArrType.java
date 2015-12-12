@@ -6,8 +6,12 @@ public class ArrType extends SymbolType{
 	private int dimension;
 	public ArrType(SymbolType valType, int dimension)
 	{
-		super("ArrayType");
-		this.valType=valType;
+		this(valType, dimension, false);
+	}
+	public ArrType(SymbolType valType, int dimension, boolean isInitialized)
+	{
+		super("ArrayType", isInitialized);
+		this.valType = valType;
 		this.dimension = dimension;
 	}
 	

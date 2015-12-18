@@ -4,12 +4,7 @@ public class IntType extends SymbolType
 {
 	public IntType()
 	{
-		this(false);
-	}
-	
-	public IntType(boolean isInitialized)
-	{
-		super("IntType", isInitialized);
+		super("IntType");
 	}
 	
 	@Override

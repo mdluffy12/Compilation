@@ -7,12 +7,7 @@ public class MethodType extends SymbolType
 	boolean isStaticMethod;
 	public MethodType(SymbolType[] parTypes,SymbolType retType, boolean isStatic)
 	{
-		this(parTypes, retType, isStatic, false);
-	}
-	
-	public MethodType(SymbolType[] parTypes,SymbolType retType, boolean isStatic, boolean isInitialized)
-	{
-		super("MethodType", isInitialized);
+		super("MethodType");
 		this.parTypes = parTypes;
 		this.retType = retType;
 		this.isStaticMethod = isStatic;

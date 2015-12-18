@@ -7,27 +7,15 @@ import slp.VirtualMethod;
 
 public abstract class SymbolType {
 	protected String name;
-	protected boolean isInitialized; 
 	static private SymbolType intType = new IntType();
 	static private SymbolType stringType = new StringType();
 	static private SymbolType boolType = new BoolType();
 	static private SymbolType voidType = new VoidType();
 	static private SymbolType nullType = new NullType();
 	
-	public SymbolType(String name, boolean isInitialized) 
+	public SymbolType(String name) 
 	{
 		this.name=name;
-		this.isInitialized = isInitialized;
-	}
-	
-	public boolean isInitialized()
-	{
-		return this.isInitialized;
-	}
-	
-	public void initialize()
-	{
-		this.isInitialized = true;
 	}
 	
 	static public SymbolType getTypeFromAST(slp.Type node, slp.SymbolTable table) {

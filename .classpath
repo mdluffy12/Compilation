@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="**/*.cup|**/*.lex" kind="src" path="src"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="C:/Development/Compiler/LEXER/java-cup-11b-runtime.jar"/>
-	<classpathentry exported="true" kind="lib" path="C:/Development/Compiler/LEXER/java-cup-11b.jar"/>
-	<classpathentry exported="true" kind="var" path="CUP_RUNTIME_JAR"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/ben/workspace/LEXER/java-cup-11b-runtime.jar"/>
+	<classpathentry exported="true" kind="lib" path="java-cup-11b.jar"/>
+	<classpathentry kind="var" path="CUP_RUNTIME_JAR"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

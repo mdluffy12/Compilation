@@ -4,13 +4,9 @@ public class NullType extends SymbolType
 {
 	public NullType()
 	{
-		this(false);
+		super("NullType");
 	}
 	
-	public NullType(boolean isInitialized)
-	{
-		super("NullType", isInitialized);
-	}
 	@Override
 	public String toString()
 	{

@@ -282,6 +282,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 		return null;
 	}
 
+	
 	public SymbolType visit(newArray arr, Environment env) {
 		SymbolType typeSize = arr.length.accept(this, env);
 
@@ -414,7 +415,6 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 						": Invalid use of a binary operation.");
 		}
 	}
-	
 	public SymbolType visit(Program prog, Environment env)
 	{	
 		for (ICClass cls : prog.getClasses()) 
@@ -557,7 +557,6 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 		env.symbolTable.ExitScope();
 		return null;
 	}
-	
 	public SymbolType visit(CallStmt call, Environment env)
 	{
 		call.getCall().accept(this, env);

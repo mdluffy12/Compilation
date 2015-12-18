@@ -37,7 +37,7 @@ public class Main {
 	  			PrettyPrinter printer = new PrettyPrinter(root);
 	  			//printer.print();
 	  			
-	  			SyntaxAnalyzer analyzer = new SyntaxAnalyzer(root);
+	  			SyntaxAnalyzerAndIRGenerator analyzer = new SyntaxAnalyzerAndIRGenerator(root);
 	  			analyzer.Analyze();
 	  			System.out.println(file.toString() + " FAILED!");
 	  			
@@ -75,7 +75,7 @@ public class Main {
 	  			PrettyPrinter printer = new PrettyPrinter(root);
 	  			//printer.print();
 	  			
-	  			SyntaxAnalyzer analyzer = new SyntaxAnalyzer(root);
+	  			SyntaxAnalyzerAndIRGenerator analyzer = new SyntaxAnalyzerAndIRGenerator(root);
 	  			analyzer.Analyze();
 	  			System.out.println(file.toString() + " PASSED!");
 	  			
@@ -125,7 +125,7 @@ public class Main {
 			
 			System.out.println("Finished Printing the AST!!");
 			
-			SyntaxAnalyzer analyzer = new SyntaxAnalyzer(root);
+			SyntaxAnalyzerAndIRGenerator analyzer = new SyntaxAnalyzerAndIRGenerator(root);
 			analyzer.Analyze();
 			
 			

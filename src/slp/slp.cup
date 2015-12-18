@@ -150,7 +150,7 @@ class_list ::= class_list:lst ic_class:c
   		RESULT.add(c);
   	 :}
  ;
-
+ 
 ic_class ::= CLASS:class_key CLASS_ID:name EXTENDS CLASS_ID:extended_class_name LCBR class_param_lst:params RCBR
 	{:
 		RESULT = new ICClass(name.toString(), extended_class_name.toString(), params.members, parser.getLine());

@@ -20,7 +20,7 @@ import slp.VirtualMethod;
 
 /** Evaluates straight line programs.
  */
-public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTypes.SymbolType> 
+public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environment, symbolTypes.SymbolType> 
 {
 
 	protected Program root;
@@ -28,7 +28,7 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 	 * 
 	 * @param root An SLP AST node.
 	 */
-	public SyntaxAnalyzer(ASTNode root) {
+	public SyntaxAnalyzerAndIRGenerator(ASTNode root) {
 		this.root = (Program)root;
 	}
 	
@@ -314,7 +314,10 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			case UMINUS:
 				if (type.isIntType()) 
 				{
-					return new symbolTypes.IntType();
+					env.GeneratedIRCode.add("Neg " + type.GetIRName());
+					SymbolType newType = new symbolTypes.IntType();
+					newType.SetIRName(type.GetIRName());
+					return newType;
 				}
 				else
 				{
@@ -324,7 +327,10 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			case LNEG:
 				if (type.isBoolType())
 				{
-					return new symbolTypes.BoolType();
+					env.GeneratedIRCode.add("Not " + type.GetIRName());
+					SymbolType newType = new symbolTypes.BoolType();
+					newType.SetIRName(type.GetIRName());
+					return newType;
 				}
 				else
 				{
@@ -572,11 +578,22 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 					": Invalid expression inside if, condition is not of boolean type.");
 		}
 		
+		int iLabelNumber = env.GlobalLabelCounter;
+		env.GlobalLabelCounter++;
+		String sLabelName = "_NotEnteringIfLabel_" + env.currentMethod.GetIRName() + "_" + iLabelNumber;
+		env.GeneratedIRCode.add("Compare 0," + sym_type.GetIRName());
+		env.GeneratedIRCode.add("JumpTrue " + sLabelName);
 		boolean has_return_before = env.has_return_in_every_path;
 		env.has_return_in_every_path = false;
 		stmt.getOperation().accept(this, env);
 		boolean has_return_in_if = env.has_return_in_every_path;
 		boolean has_return_in_else = false;
+		String sEndIfLabel = "_EndOfIfLabel_" + env.currentMethod.GetIRName() + "_" + iLabelNumber;
+		if (stmt.hasElse()) 
+		{
+			env.GeneratedIRCode.add("Jump " + sEndIfLabel);
+		}
+		env.GeneratedIRCode.add(sLabelName + ":");
 		
 		// Validate "else" statement
 		if (stmt.hasElse()) 
@@ -584,7 +601,9 @@ public class SyntaxAnalyzer implements PropagatingVisitor<Environment, symbolTyp
 			env.has_return_in_every_path = false;
 			stmt.getElseOperation().accept(this, env);
 			has_return_in_else = env.has_return_in_every_path;
+			env.GeneratedIRCode.add(sEndIfLabel + ":");
 		}
+		
 		
 		env.has_return_in_every_path = (has_return_before) || (has_return_in_if && has_return_in_else);
 		return null;

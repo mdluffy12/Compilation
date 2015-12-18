@@ -15,4 +15,7 @@ public class Environment {
 	public symbolTypes.MethodType currentMethod = null;
 	public boolean has_return_in_every_path;
 	public String currentClassName;
+	public List<String> GeneratedIRCode = new ArrayList<String>();
+	public int iCurrentAvailableTempNumber;
+	public int GlobalLabelCounter = 0;
 }

@@ -7,6 +7,7 @@ import slp.VirtualMethod;
 
 public abstract class SymbolType {
 	protected String name;
+	protected String IRName;
 	static private SymbolType intType = new IntType();
 	static private SymbolType stringType = new StringType();
 	static private SymbolType boolType = new BoolType();
@@ -16,6 +17,23 @@ public abstract class SymbolType {
 	public SymbolType(String name) 
 	{
 		this.name=name;
+		this.IRName = "";
+	}
+	
+	public SymbolType(String name, String IRName) 
+	{
+		this.name=name;
+		this.IRName = IRName;
+	}
+	
+	public void SetIRName(String IRName)
+	{
+		this.IRName = IRName;
+	}
+	
+	public String GetIRName()
+	{
+		return IRName;
 	}
 	
 	static public SymbolType getTypeFromAST(slp.Type node, slp.SymbolTable table) {

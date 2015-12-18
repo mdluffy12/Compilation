@@ -358,11 +358,20 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 			case PLUS:
 				if (type1.isIntType() && type2.isIntType()) 
 				{
-					return new symbolTypes.IntType();
+					env.GeneratedIRCode.add("Add "+type1.GetIRName()+" "+type2.GetIRName());
+					SymbolType newType = new symbolTypes.IntType();
+					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
+					env.iCurrentAvailableTempNumber++;
+					return newType;
 				}
 				else if (type1.isStringType() && type2.isStringType())
 				{
-					return new symbolTypes.StringType();
+					env.GeneratedIRCode.add("__stringCat(" +type1.GetIRName()+","+type2.GetIRName()+")");
+					SymbolType newType = new symbolTypes.StringType();
+					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
+					env.iCurrentAvailableTempNumber++;
+					return newType;
+					//return new symbolTypes.StringType();
 				}
 				else
 				{
@@ -370,11 +379,55 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 							": Invalid  usage of a arithmetic operation <" + expr.op.toString() +">" );
 				}
 			case MINUS:
+				if (type1.isIntType() && type2.isIntType()) {
+					env.GeneratedIRCode.add("Sub "+type1.GetIRName()+" "+type2.GetIRName());
+					SymbolType newType = new symbolTypes.IntType();
+					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
+					env.iCurrentAvailableTempNumber++;
+					return newType;
+					//return new symbolTypes.IntType();
+				}
+				else
+				{
+					throw new RuntimeException(expr.getLine()+
+							": Invalid  usage of a arithmetic operation <" + expr.op.toString() +">." );
+				}
 			case MULT:
+				if (type1.isIntType() && type2.isIntType()) {
+					env.GeneratedIRCode.add("Mul "+type1.GetIRName()+" "+type2.GetIRName());
+					SymbolType newType = new symbolTypes.IntType();
+					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
+					env.iCurrentAvailableTempNumber++;
+					return newType;
+					//return new symbolTypes.IntType();
+				}
+				else
+				{
+					throw new RuntimeException(expr.getLine()+
+							": Invalid  usage of a arithmetic operation <" + expr.op.toString() +">." );
+				}
 			case DIV:
+				if (type1.isIntType() && type2.isIntType()) {
+					env.GeneratedIRCode.add("Div "+type1.GetIRName()+" "+type2.GetIRName());
+					SymbolType newType = new symbolTypes.IntType();
+					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
+					env.iCurrentAvailableTempNumber++;
+					return newType;
+					//return new symbolTypes.IntType();
+				}
+				else
+				{
+					throw new RuntimeException(expr.getLine()+
+							": Invalid  usage of a arithmetic operation <" + expr.op.toString() +">." );
+				}
 			case MOD:
 				if (type1.isIntType() && type2.isIntType()) {
-					return new symbolTypes.IntType();
+					env.GeneratedIRCode.add("Mod "+type1.GetIRName()+" "+type2.GetIRName());
+					SymbolType newType = new symbolTypes.IntType();
+					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
+					env.iCurrentAvailableTempNumber++;
+					return newType;
+					//return new symbolTypes.IntType();
 				}
 				else
 				{
@@ -387,7 +440,12 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 			case GE:
 				if (type1.isIntType() && type2.isIntType())
 				{
-					return new symbolTypes.BoolType();
+					env.GeneratedIRCode.add("Compare "+type1.GetIRName()+" "+type2.GetIRName());
+					SymbolType newType = new symbolTypes.BoolType();
+					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
+					env.iCurrentAvailableTempNumber++;
+					return newType;
+					//return new symbolTypes.BoolType();
 				}
 				else
 				{
@@ -399,7 +457,12 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 			case LOR:
 				if (type1.isBoolType() && type2.isBoolType())
 				{
-					return new symbolTypes.BoolType();
+					env.GeneratedIRCode.add("Compare "+type1.GetIRName()+" "+type2.GetIRName());
+					SymbolType newType = new symbolTypes.BoolType();
+					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
+					env.iCurrentAvailableTempNumber++;
+					return newType;
+					//return new symbolTypes.BoolType();
 				}
 				else
 				{
@@ -409,11 +472,32 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 			case NEQUAL:
 			case EQUAL:
 				if (type1.equals(type2))
-					return new symbolTypes.BoolType();
+				{
+					env.GeneratedIRCode.add("Compare "+type1.GetIRName()+" "+type2.GetIRName());
+					SymbolType newType = new symbolTypes.BoolType();
+					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
+					env.iCurrentAvailableTempNumber++;
+					return newType;
+					//return new symbolTypes.BoolType();
+				}
 				if ((type1.isNullable()) && (type2.isNullType()) || (type1.isNullType()) && (type2.isNullable()))
-					return new symbolTypes.BoolType();
+				{
+					env.GeneratedIRCode.add("Compare "+type1.GetIRName()+" "+type2.GetIRName());
+					SymbolType newType = new symbolTypes.BoolType();
+					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
+					env.iCurrentAvailableTempNumber++;
+					return newType;
+					//return new symbolTypes.BoolType();
+				}
 				if ((type1.subTypeOf(type2)) || (type2.subTypeOf(type1)))
-					return new symbolTypes.BoolType();
+				{
+					env.GeneratedIRCode.add("Compare "+type1.GetIRName()+" "+type2.GetIRName());
+					SymbolType newType = new symbolTypes.BoolType();
+					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
+					env.iCurrentAvailableTempNumber++;
+					return newType;
+					//return new symbolTypes.BoolType();
+				}
 				throw new RuntimeException(expr.getLine()+
 						": Invalid usage of a binary operation <"+ expr.op.toString()+ "> with a mismatching expression.");
 			default:

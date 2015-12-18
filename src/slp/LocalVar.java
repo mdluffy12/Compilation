@@ -6,13 +6,13 @@ public class LocalVar extends Stmt {
 	public  String name;
 	private Type t;
 	private Expr initValue = null;
-	public LocalVar(Type t,String name, int line){
-		super(line);
+	public LocalVar(Type t,String name, int line, String comment){
+		super(line, comment);
 		this.t  = t;
 		this.name=name;
 	}
-	public LocalVar(Type t,String name, Expr initValue, int line){
-		this(t, name, line);
+	public LocalVar(Type t,String name, Expr initValue, int line, String comment){
+		this(t, name, line, comment);
 		this.initValue=initValue;
 	}
 	public Type getType(){

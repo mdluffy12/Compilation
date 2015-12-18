@@ -1,8 +1,8 @@
 package slp;
 
 public class Break extends Stmt {
-	public Break(int line){
-		super(line);
+	public Break(int line, String comment){
+		super(line, comment);
 	}
 
 	@Override

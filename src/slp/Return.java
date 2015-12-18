@@ -4,8 +4,8 @@ public class Return extends Stmt {
 
 	private Expr value = null;
 
-	public Return(Expr e, int line) {
-		super(line);
+	public Return(Expr e, int line,String comment) {
+		super(line, comment);
 		this.value = e;
 	}
 

@@ -6,8 +6,10 @@ public abstract class Stmt extends ASTNode {
 	/** Accepts a visitor object as part of the visitor pattern.
 	 * @param visitor A visitor.
 	 */
-	protected Stmt(int line)
+	String comment;
+	protected Stmt(int line, String stmtComment)
 	{
 		super(line);
+		this.comment = stmtComment;
 	}
 }

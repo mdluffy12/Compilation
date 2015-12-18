@@ -5,12 +5,12 @@ public class If extends Stmt{
 	private Stmt operation;
 	private Stmt elseOp = null;
 	
-	public If(Expr cond,Stmt operation,Stmt elseOp, int line){
-		this(cond, operation, line);
+	public If(Expr cond,Stmt operation,Stmt elseOp, int line,String comment){
+		this(cond, operation, line, comment);
 		this.elseOp=elseOp;
 	}
-	public If(Expr cond, Stmt op, int line){
-		super(line);
+	public If(Expr cond, Stmt op, int line, String comment){
+		super(line,comment);
 		this.cond=cond;
 		this.operation=op;
 	}

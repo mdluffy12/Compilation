@@ -8,8 +8,8 @@ public class AssignStmt extends Stmt {
 
 	public final Expr rhs;
 
-	public AssignStmt(ValueLocation varExpr, Expr rhs, int line) {
-		super(line);
+	public AssignStmt(ValueLocation varExpr, Expr rhs, int line, String comment) {
+		super(line, comment);
 		this.varExpr = varExpr;
 		this.rhs = rhs;
 	}

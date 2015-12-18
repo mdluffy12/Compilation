@@ -27,6 +27,11 @@ parser code  {:
 	public void syntax_error(Symbol s) {
 		System.out.println("Line " + getLine()+": Syntax error; unexpected " + getText());
 	}
+	
+	public String getyytext()
+	{
+		return lexer.yytext();
+	}
 :}
 
 // This is just for debugging
@@ -275,27 +280,27 @@ stmt_list ::=
 ;
 
 stmt ::= Location:l ASSIGN expr:e SEMI
-	{: RESULT = new AssignStmt(l,e, parser.getLine()); :} |
+	{: RESULT = new AssignStmt(l,e, parser.getLine(), parser.getText()); :} |
 	FunctionCall:c SEMI
-	{: RESULT = new CallStmt(c, parser.getLine()); :}|
+	{: RESULT = new CallStmt(c, parser.getLine(), parser.getText()); :}|
 	RETURN expr:e SEMI
-	{: RESULT = new Return(e, parser.getLine()); :}|
+	{: RESULT = new Return(e, parser.getLine(), parser.getText()); :}|
 	RETURN SEMI
-	{: RESULT = new Return(null, parser.getLine()); :}|
+	{: RESULT = new Return(null, parser.getLine(), parser.getText()); :}|
 	IF LP expr:e RP stmt:doStmt else_stmt:eStmt
-	{: RESULT = new If(e,doStmt,eStmt, parser.getLine()); :}|
+	{: RESULT = new If(e,doStmt,eStmt, parser.getLine(), parser.getText()); :}|
 	WHILE LP expr:e RP stmt:doStmt
-	{: RESULT = new While(e,doStmt, parser.getLine()); :}| 
+	{: RESULT = new While(e,doStmt, parser.getLine(), parser.getText()); :}| 
 	BREAK SEMI
-	{: RESULT = new Break(parser.getLine()); :}|
+	{: RESULT = new Break(parser.getLine(), parser.getText()); :}|
 	CONTINUE SEMI
-	{: RESULT = new Continue(parser.getLine()); :}|
+	{: RESULT = new Continue(parser.getLine(), parser.getText()); :}|
 	LCBR stmt_list:sl RCBR
-	{: RESULT = new BlockStmt(sl, parser.getLine()); :}|
+	{: RESULT = new BlockStmt(sl, parser.getLine(), parser.getText()); :}|
 	type:t ID:vName ASSIGN expr:e SEMI
-	{: RESULT = new LocalVar(t,vName.toString(),e, parser.getLine()); :}|
+	{: RESULT = new LocalVar(t,vName.toString(),e, parser.getLine(), parser.getyytext()); :}|
 	type:t ID:vName SEMI 
-	{: RESULT = new LocalVar(t,vName.toString(), parser.getLine()); :}
+	{: RESULT = new LocalVar(t,vName.toString(), parser.getLine(), parser.getyytext()); :}
 ;
 
 else_stmt ::= ELSE stmt:s

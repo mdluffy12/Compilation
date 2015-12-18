@@ -3,9 +3,9 @@ package slp;
 public class BlockStmt extends Stmt {
 
 	public StmtList m_stmtList;
-	public BlockStmt(StmtList stmtList, int line)
+	public BlockStmt(StmtList stmtList, int line, String comment)
 	{
-		super(line);
+		super(line, comment);
 		m_stmtList = stmtList;
 	}
 	

@@ -2,8 +2,8 @@ package slp;
 
 public class CallStmt extends Stmt {
 	private FunctionCall call;
-	public CallStmt(FunctionCall c, int line){
-		super(line);
+	public CallStmt(FunctionCall c, int line, String comment){
+		super(line, comment);
 		this.call=c;
 	}
 	public FunctionCall getCall(){

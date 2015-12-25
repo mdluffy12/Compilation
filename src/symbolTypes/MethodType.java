@@ -5,12 +5,22 @@ public class MethodType extends SymbolType
 	SymbolType[] parTypes;
 	SymbolType retType;
 	boolean isStaticMethod;
+	public int iIndexInVirtualTable;
 	public MethodType(SymbolType[] parTypes,SymbolType retType, boolean isStatic)
 	{
 		super("MethodType");
 		this.parTypes = parTypes;
 		this.retType = retType;
 		this.isStaticMethod = isStatic;
+		iIndexInVirtualTable = -1;
+	}
+	
+	public SymbolType Clone()
+	{
+		MethodType t1 = new MethodType(parTypes, retType, isStaticMethod);
+		t1.iIndexInVirtualTable = iIndexInVirtualTable;
+		CopySymbolData(t1);
+		return t1;
 	}
 	
 	@Override

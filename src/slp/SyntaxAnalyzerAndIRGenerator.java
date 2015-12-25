@@ -1,9 +1,10 @@
 package slp;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
-import jdk.nashorn.internal.ir.BlockStatement;
 import symbolTypes.*;
 import slp.BlockStmt;
 import slp.ClassField;
@@ -43,7 +44,24 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 		containsMain(root);
 		//System.out.println("Going Over Main Syntax Analysis");
 		root.accept(this, env);
+		
+		WriteGeneratedIRCodeToFile(env, "out.lir");
 		//System.out.println("Finished Syntax Analysis Successfully");
+	}
+	
+	private void WriteGeneratedIRCodeToFile(Environment env, String sFileName)
+	{
+		FileWriter writer;
+		try {
+			writer = new FileWriter(sFileName);
+			for(String str: env.GeneratedIRCode) {
+				writer.write(str + "\n");
+			}
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void InsertLibraryClassInformation(Environment env)
@@ -52,77 +70,106 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 		env.symbolTable.InsertNewDeclerationAsBothStaticAndVirtual("Library", libType);
 		SymbolType retType;
 		SymbolType[] argsTypes;
+		MethodType meth1;
 		
 		retType = new VoidType();
 		argsTypes = new SymbolType[1];
 		argsTypes[0] = new StringType();
-		libType.AddNewMember("println", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__println");
+		libType.AddNewMember("println", meth1);
 		
 		retType = new VoidType();
 		argsTypes = new SymbolType[1];
 		argsTypes[0] = new StringType();
-		libType.AddNewMember("print", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__print");
+		libType.AddNewMember("print", meth1);
 		
 		retType = new VoidType();
 		argsTypes = new SymbolType[1];
 		argsTypes[0] = new IntType();
-		libType.AddNewMember("printi", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__printi");
+		libType.AddNewMember("printi", meth1);
 		
 		retType = new VoidType();
 		argsTypes = new SymbolType[1];
 		argsTypes[0] = new BoolType();
-		libType.AddNewMember("printb", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__printb");
+		libType.AddNewMember("printb", meth1);
 		
 		retType = new IntType();
 		argsTypes = new SymbolType[1];
 		argsTypes[0] = new VoidType();
-		libType.AddNewMember("readi", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__readi");
+		libType.AddNewMember("readi", meth1);
 		
 		retType = new StringType();
 		argsTypes = new SymbolType[1];
 		argsTypes[0] = new VoidType();
-		libType.AddNewMember("readln", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__readln");
+		libType.AddNewMember("readln", meth1);
 
 		retType = new BoolType();
 		argsTypes = new SymbolType[1];
 		argsTypes[0] = new VoidType();
-		libType.AddNewMember("eof", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__eof");
+		libType.AddNewMember("eof", meth1);
 
 		retType = new IntType();
 		argsTypes = new SymbolType[2];
 		argsTypes[0] = new StringType();
 		argsTypes[1] = new IntType();
-		libType.AddNewMember("stoi", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__stoi");
+		libType.AddNewMember("stoi", meth1);
 
 		retType = new StringType();
 		argsTypes = new SymbolType[1];
 		argsTypes[0] = new IntType();
-		libType.AddNewMember("itos", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__itos");
+		libType.AddNewMember("itos", meth1);
 		
 		retType = new ArrType(new IntType(), 1);
 		argsTypes = new SymbolType[1];
 		argsTypes[0] = new StringType();
-		libType.AddNewMember("stoa", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__stoa");
+		libType.AddNewMember("stoa", meth1);
 
 		retType = new StringType();
 		argsTypes = new SymbolType[1];
 		argsTypes[0] = new ArrType(new IntType(), 1);
-		libType.AddNewMember("atos", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__atos");
+		libType.AddNewMember("atos", meth1);
 		
 		retType = new IntType();
 		argsTypes = new SymbolType[1];
 		argsTypes[0] = new IntType();
-		libType.AddNewMember("random", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__random");
+		libType.AddNewMember("random", meth1);
 		
 		retType = new IntType();
 		argsTypes = new SymbolType[1];
 		argsTypes[0] = new VoidType();
-		libType.AddNewMember("time", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__time");
+		libType.AddNewMember("time", meth1);
 		
 		retType = new VoidType();
 		argsTypes = new SymbolType[1];
 		argsTypes[0] = new IntType();
-		libType.AddNewMember("exit", new MethodType(argsTypes, retType, true));
+		meth1 = new MethodType(argsTypes, retType, true);
+		meth1.SetIRName("__exit");
+		libType.AddNewMember("exit", meth1);
 	}
 	
 	private void InsertAllClassInformation(Program prog1, Environment env) {
@@ -157,7 +204,17 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 		for (ICClass cls : prog1.getClasses())
 		{
 			ClassType clsType = (ClassType)env.symbolTable.GetClosestVarWithSameName(cls.getName());
-			
+			List<String> vTable;
+			if(clsType.hasSuperClass())
+			{
+				vTable = new ArrayList<String>(clsType.getSuperClass().GetVirtualTable());
+				clsType.iAmountOfVariables = clsType.getSuperClass().iAmountOfVariables; //because it should old all parents vars
+			}
+			else
+			{
+				vTable = new ArrayList<String>();
+			}
+			clsType.SetVirtualTable(vTable);
 			for (ClassMember member : cls.getMembers())
 			{
 				SymbolType memberType = null;
@@ -175,6 +232,9 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 						throw new RuntimeException(field.getLine()+
 								":" + "Unknown member type " + field.getType().getName());
 					}
+					memberType.SetIRName(""); //class vars does not have names they are used via offset
+					memberType.iOffset = clsType.iAmountOfVariables;
+					clsType.iAmountOfVariables++;
 					clsType.AddNewMember(field.getName(), memberType);
 				}
 				else
@@ -182,24 +242,52 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 					
 					
 					ClassMethod met1 = (ClassMethod)member;
-					memberType = SymbolType.createMethType(met1, env.symbolTable);
-					
+					MethodType methodT = SymbolType.createMethType(met1, env.symbolTable);
+					memberType = methodT;
+					if(met1.name.equals("main"))
+					{
+						memberType.SetIRName("_ic_main");
+					}
+					else
+					{
+						memberType.SetIRName("_" + clsType.getName() + "_" + met1.name);
+					}
 					if(clsType.GetMemberFromCurrentClassOnly(met1.getName()) != null)
 					{
 						throw new RuntimeException(member.getLine()+
 								":" + "A method with the same name is already defined in this class method overloading or redifining is not allowed");
 					}
 					SymbolType overriddenMethod = clsType.GetMemberFromMeOrClosestParent(met1.getName());
+					
 					if(overriddenMethod != null)
 					{
 						if(overriddenMethod.compareType(memberType) == false)
-						throw new RuntimeException(member.getLine()+
-								":" + "cannot define the method " + memberType.getName() + " with the type " + memberType.toString() + 
-								" as an override to the type " + overriddenMethod.toString() + " the methods doesn't have the same signature or the other is a var");
+						{
+							throw new RuntimeException(member.getLine()+
+									":" + "cannot define the method " + memberType.getName() + " with the type " + memberType.toString() + 
+									" as an override to the type " + overriddenMethod.toString() + " the methods doesn't have the same signature or the other is a var");
+						}
+
+						if(methodT.getIsStatic() == false)
+						{
+							//override virtual method
+							methodT.iIndexInVirtualTable = ((MethodType)overriddenMethod).iIndexInVirtualTable;
+							vTable.set(methodT.iIndexInVirtualTable, methodT.GetIRName());
+						}
+						
+					}
+					else
+					{
+						if(methodT.getIsStatic() == false)
+						{
+							methodT.iIndexInVirtualTable = vTable.size();
+							vTable.add(methodT.GetIRName());
+						}
 					}
 					clsType.AddNewMember(met1.getName(), memberType);
 				}
 			}
+			env.GeneratedIRCode.add("_VT_" + clsType.getName() + ":" + vTable.toString());
 		}
 	}
 
@@ -265,16 +353,27 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 
 	public SymbolType visit(AssignStmt stmt, Environment env) 
 	{
-		SymbolType type1 = stmt.varExpr.accept(this, env);
-		SymbolType type2 = stmt.rhs.accept(this, env);
 		
-		if (type1 == null || type2 == null) 
+		SymbolType type2 = stmt.rhs.accept(this, env);
+		if(type2 == null)
 		{
 			throw new RuntimeException(stmt.getLine()+
-					": can not perform assignment from type void, or to type void.");
+					": can not perform assignment from type void");
 		}
 		
-		if(!type1.compareType(type2))
+		stmt.varExpr.bIsLeftSideOfAssignStmt = true; //set it so it won't create a temperoray and the name will be the true var name
+		 //where we should store the value
+		stmt.varExpr.sAssignIRName = type2.GetIRName();
+		SymbolType type1 = stmt.varExpr.accept(this, env);
+		
+		
+		if (type1 == null) 
+		{
+			throw new RuntimeException(stmt.getLine()+
+					": can not perform assignment to type void.");
+		}
+		
+		if(!type2.subTypeOf(type1))
 		{
 			throw new RuntimeException(stmt.getLine()+
 					": can not perform assignment from type "+type2.toString() +" to type "+type1.toString());
@@ -292,14 +391,36 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 		}
 
 		SymbolType t1 = arr.type.accept(this, env);
+		ArrType retType;
 		if(t1 instanceof ArrType)
 		{
 			ArrType art1 = (ArrType)t1;
-			return new ArrType(art1.getElemType(), art1.getDimension() + 1);
+			retType =  new ArrType(art1.getElemType(), art1.getDimension() + 1);
 		}
-		return new ArrType(t1, 1);
+		else
+		{
+			retType =  new ArrType(t1, 1);
+		}
+		retType.SetIRName("R"+env.iCurrentAvailableTempNumber);
+		env.iCurrentAvailableTempNumber++;
+		env.GeneratedIRCode.add("Mul 4, " + typeSize.GetIRName());
+		env.GeneratedIRCode.add("Library __allocateArray(" + typeSize.GetIRName() + "), " + retType.GetIRName());
+		return retType;
 	}
 
+	public void GenerateLogicalNotCode(String sRegisterName, Environment env)
+	{
+		env.GeneratedIRCode.add("#logical not");
+		env.GeneratedIRCode.add("Not " + sRegisterName);
+		env.GeneratedIRCode.add("Compare 0, " + sRegisterName); //the bool for true is 1 32 times otherwise we have a problem
+		int iLabelNumber = env.GlobalLabelCounter;
+		env.GlobalLabelCounter++;
+		String sLabelName = "_Label_Logical_Not_" + env.currentMethod.GetIRName() + "_" + iLabelNumber;
+		env.GeneratedIRCode.add("JumpTrue " + sLabelName);
+		env.GeneratedIRCode.add("Move 1, " + sRegisterName);
+		env.GeneratedIRCode.add(sLabelName + ":");
+	}
+	
 	public SymbolType visit(UnaryOpExpr expr, Environment env) 
 	{
 		SymbolType type = expr.operand.accept(this, env);
@@ -327,7 +448,8 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 			case LNEG:
 				if (type.isBoolType())
 				{
-					env.GeneratedIRCode.add("Not " + type.GetIRName());
+					
+					GenerateLogicalNotCode(type.GetIRName(), env);
 					SymbolType newType = new symbolTypes.BoolType();
 					newType.SetIRName(type.GetIRName());
 					return newType;
@@ -358,20 +480,19 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 			case PLUS:
 				if (type1.isIntType() && type2.isIntType()) 
 				{
-					env.GeneratedIRCode.add("Add "+type1.GetIRName()+" "+type2.GetIRName());
+					env.GeneratedIRCode.add("Add "+type1.GetIRName()+" ,"+type2.GetIRName());
 					SymbolType newType = new symbolTypes.IntType();
-					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
-					env.iCurrentAvailableTempNumber++;
+					newType.SetIRName(type2.GetIRName());
 					return newType;
 				}
 				else if (type1.isStringType() && type2.isStringType())
-				{
-					env.GeneratedIRCode.add("__stringCat(" +type1.GetIRName()+","+type2.GetIRName()+")");
+				{ //need to change it
+					
 					SymbolType newType = new symbolTypes.StringType();
 					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
 					env.iCurrentAvailableTempNumber++;
+					env.GeneratedIRCode.add("Library __stringCat(" +type1.GetIRName()+","+type2.GetIRName()+") ," + newType.GetIRName());
 					return newType;
-					//return new symbolTypes.StringType();
 				}
 				else
 				{
@@ -380,12 +501,10 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 				}
 			case MINUS:
 				if (type1.isIntType() && type2.isIntType()) {
-					env.GeneratedIRCode.add("Sub "+type1.GetIRName()+" "+type2.GetIRName());
+					env.GeneratedIRCode.add("Sub "+ type2.GetIRName()+" ,"+ type1.GetIRName());
 					SymbolType newType = new symbolTypes.IntType();
-					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
-					env.iCurrentAvailableTempNumber++;
+					newType.SetIRName(type1.GetIRName());
 					return newType;
-					//return new symbolTypes.IntType();
 				}
 				else
 				{
@@ -394,12 +513,10 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 				}
 			case MULT:
 				if (type1.isIntType() && type2.isIntType()) {
-					env.GeneratedIRCode.add("Mul "+type1.GetIRName()+" "+type2.GetIRName());
+					env.GeneratedIRCode.add("Mul "+type1.GetIRName()+" ,"+type2.GetIRName());
 					SymbolType newType = new symbolTypes.IntType();
-					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
-					env.iCurrentAvailableTempNumber++;
+					newType.SetIRName(type2.GetIRName());
 					return newType;
-					//return new symbolTypes.IntType();
 				}
 				else
 				{
@@ -408,12 +525,10 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 				}
 			case DIV:
 				if (type1.isIntType() && type2.isIntType()) {
-					env.GeneratedIRCode.add("Div "+type1.GetIRName()+" "+type2.GetIRName());
+					env.GeneratedIRCode.add("Div "+type2.GetIRName()+" ,"+type1.GetIRName());
 					SymbolType newType = new symbolTypes.IntType();
-					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
-					env.iCurrentAvailableTempNumber++;
+					newType.SetIRName(type1.GetIRName());
 					return newType;
-					//return new symbolTypes.IntType();
 				}
 				else
 				{
@@ -422,30 +537,55 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 				}
 			case MOD:
 				if (type1.isIntType() && type2.isIntType()) {
-					env.GeneratedIRCode.add("Mod "+type1.GetIRName()+" "+type2.GetIRName());
+					env.GeneratedIRCode.add("Mod "+type2.GetIRName()+" ,"+type1.GetIRName());
 					SymbolType newType = new symbolTypes.IntType();
-					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
-					env.iCurrentAvailableTempNumber++;
+					newType.SetIRName(type1.GetIRName());
 					return newType;
-					//return new symbolTypes.IntType();
 				}
 				else
 				{
 					throw new RuntimeException(expr.getLine()+
 							": Invalid  usage of a arithmetic operation <" + expr.op.toString() +">." );
 				}
-			case LT:
 			case GT:
-			case LE:
-			case GE:
+				SymbolType tmp = type1;
+				type1 = type2;
+				type2 = tmp;
+				env.GeneratedIRCode.add("#a > b");
+			case LT:
+				env.GeneratedIRCode.add("#a < b");
 				if (type1.isIntType() && type2.isIntType())
 				{
-					env.GeneratedIRCode.add("Compare "+type1.GetIRName()+" "+type2.GetIRName());
+					env.GeneratedIRCode.add("Sub " + type2.GetIRName() + ", " + type1.GetIRName());
+					env.GeneratedIRCode.add("Not " + type1.GetIRName());
+					env.GeneratedIRCode.add("Or 2147483647, " + type1.GetIRName());
+					env.GeneratedIRCode.add("Not " + type1.GetIRName());
 					SymbolType newType = new symbolTypes.BoolType();
-					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
-					env.iCurrentAvailableTempNumber++;
+					newType.SetIRName(type1.GetIRName());
 					return newType;
-					//return new symbolTypes.BoolType();
+				}
+				else
+				{
+					throw new RuntimeException(expr.getLine()+
+						": Invalid  usage of a binary operation '"+ expr.op.toString()+
+						"' with a non-integer expression. expressions are left: " + type1.toString() + " right: " + type2.toString());
+				}
+				
+			case LE:
+				tmp = type1;
+				type1 = type2;
+				type2 = tmp;
+				env.GeneratedIRCode.add("#a <= b");
+			case GE: //need to change it not good
+				env.GeneratedIRCode.add("#a >= b");
+				if (type1.isIntType() && type2.isIntType())
+				{
+					env.GeneratedIRCode.add("Sub " + type2.GetIRName() + ", " + type1.GetIRName());
+					env.GeneratedIRCode.add("Or 2147483647, " + type1.GetIRName()); 
+					env.GeneratedIRCode.add("Not " + type1.GetIRName()); 
+					SymbolType newType = new symbolTypes.BoolType();
+					newType.SetIRName(type1.GetIRName());
+					return newType;
 				}
 				else
 				{
@@ -454,15 +594,25 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 						"' with a non-integer expression. expressions are left: " + type1.toString() + " right: " + type2.toString());
 				}
 			case LAND:
+				if (type1.isBoolType() && type2.isBoolType())
+				{
+					env.GeneratedIRCode.add("And "+type1.GetIRName()+" ,"+type2.GetIRName());
+					SymbolType newType = new symbolTypes.BoolType();
+					newType.SetIRName(type2.GetIRName());
+					return newType;
+				}
+				else
+				{
+				throw new RuntimeException(expr.getLine()+
+						": Invalid usage of a binary operation <"+ expr.op.toString()+ "> with a non-boolean expression.");
+				}
 			case LOR:
 				if (type1.isBoolType() && type2.isBoolType())
 				{
-					env.GeneratedIRCode.add("Compare "+type1.GetIRName()+" "+type2.GetIRName());
+					env.GeneratedIRCode.add("Or "+type1.GetIRName()+" ,"+type2.GetIRName());
 					SymbolType newType = new symbolTypes.BoolType();
-					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
-					env.iCurrentAvailableTempNumber++;
+					newType.SetIRName(type2.GetIRName());
 					return newType;
-					//return new symbolTypes.BoolType();
 				}
 				else
 				{
@@ -470,36 +620,27 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 						": Invalid usage of a binary operation <"+ expr.op.toString()+ "> with a non-boolean expression.");
 				}
 			case NEQUAL:
-			case EQUAL:
-				if (type1.equals(type2))
+			case EQUAL://neeed to fix it
+				boolean bIsLegal = false;;
+				bIsLegal = bIsLegal || type1.equals(type2);
+				bIsLegal = bIsLegal || (type1.isNullable()) && (type2.isNullType()) || (type1.isNullType()) && (type2.isNullable());
+				bIsLegal = bIsLegal || (type1.subTypeOf(type2)) || (type2.subTypeOf(type1));
+				if(false == bIsLegal)
 				{
-					env.GeneratedIRCode.add("Compare "+type1.GetIRName()+" "+type2.GetIRName());
-					SymbolType newType = new symbolTypes.BoolType();
-					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
-					env.iCurrentAvailableTempNumber++;
-					return newType;
-					//return new symbolTypes.BoolType();
+					throw new RuntimeException(expr.getLine()+
+							": Invalid usage of a binary operation <"+ expr.op.toString()+ "> with a mismatching expression.");
 				}
-				if ((type1.isNullable()) && (type2.isNullType()) || (type1.isNullType()) && (type2.isNullable()))
+				else
 				{
-					env.GeneratedIRCode.add("Compare "+type1.GetIRName()+" "+type2.GetIRName());
-					SymbolType newType = new symbolTypes.BoolType();
-					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
-					env.iCurrentAvailableTempNumber++;
+					SymbolType newType = new BoolType();
+					newType.SetIRName(type2.GetIRName());
+					env.GeneratedIRCode.add("Xor " + type1.GetIRName() + " ," + type2.GetIRName());
+					if(expr.op == slp.Operator.EQUAL)
+					{
+						GenerateLogicalNotCode(newType.GetIRName(), env);
+					}
 					return newType;
-					//return new symbolTypes.BoolType();
 				}
-				if ((type1.subTypeOf(type2)) || (type2.subTypeOf(type1)))
-				{
-					env.GeneratedIRCode.add("Compare "+type1.GetIRName()+" "+type2.GetIRName());
-					SymbolType newType = new symbolTypes.BoolType();
-					newType.SetIRName("R"+env.iCurrentAvailableTempNumber);
-					env.iCurrentAvailableTempNumber++;
-					return newType;
-					//return new symbolTypes.BoolType();
-				}
-				throw new RuntimeException(expr.getLine()+
-						": Invalid usage of a binary operation <"+ expr.op.toString()+ "> with a mismatching expression.");
 			default:
 				throw new RuntimeException(expr.getLine()+
 						": Invalid use of a binary operation.");
@@ -522,6 +663,7 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 		ClassType classType = (ClassType) env.symbolTable.GetClosestVarWithSameName(classId);
 		env.symbolTable.InsertNewDecleration("This", classType);
 		env.currentClassName = classId;
+		env.currentClass = classType;
 		for (ClassMember member : cls.getMembers()) {
 
 			// Initialize needed parameters:
@@ -588,6 +730,7 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 		
 		if (!env.symbolTable.IsDeclaredInCurrentScope(formalId))
 		{
+			formalType.SetIRName(formal.getName());
 			env.symbolTable.InsertNewDecleration(formalId, formalType);
 			return formalType;
 		}
@@ -619,7 +762,10 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 			SymbolType formalType = formal.accept(this, env);
 			env.symbolTable.InsertNewDecleration(formal.getName(), formalType);
 		}
-		env.currentMethod = SymbolType.createMethType(method, env.symbolTable) ;
+		env.currentMethod = SymbolType.createMethType(method, env.symbolTable);
+		env.currentMethod.SetIRName(env.currentClass.GetMemberFromCurrentClassOnly(method.name).GetIRName());
+		env.GeneratedIRCode.add(env.currentMethod.GetIRName() + ":");
+		env.LocalVarIndex = 0; //so vars will start from 0
 		env.has_return_in_every_path = false;
 		for (Stmt s : method.getStatements().statements)
 		{
@@ -630,6 +776,18 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 			throw new RuntimeException(method.getLine()+
 					": Function does not have a return in every path and it is not a void type");
 		}
+		if(env.has_return_in_every_path == false)
+		{
+			//add implicit void return 
+			if(env.currentMethod.GetIRName().equals("_ic_main"))
+			{
+				env.GeneratedIRCode.add("Library __exit(0), Rdummy");
+			}
+			else
+			{
+				env.GeneratedIRCode.add("Return 9999");
+			}
+		}
 		env.currentMethod = null;
 		method.getType().accept(this, env);
 		env.symbolTable.ExitScope();
@@ -638,7 +796,6 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 	public SymbolType visit(BlockStmt blk, Environment env)
 	{
 		env.symbolTable.StartScope();
-		
 		for (Stmt stmnt : blk.m_stmtList.statements)
 		{
 			stmnt.accept(this, env);
@@ -649,12 +806,17 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 	}
 	public SymbolType visit(CallStmt call, Environment env)
 	{
+		env.GeneratedIRCode.add("#line " + call.getLine());
 		call.getCall().accept(this, env);
 		return null;
 	}
 	
 	public SymbolType visit(If stmt, Environment env) 
 	{
+		env.GeneratedIRCode.add("#line " + stmt.getLine());
+		int iLabelNumber = env.GlobalLabelCounter;
+		env.GlobalLabelCounter++;
+		String sLabelName = "_NotEnteringIfLabel_" + env.currentMethod.GetIRName() + "_" + iLabelNumber;
 		SymbolType sym_type = stmt.getCondition().accept(this, env);
 		if(!sym_type.isBoolType())
 		{
@@ -662,9 +824,6 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 					": Invalid expression inside if, condition is not of boolean type.");
 		}
 		
-		int iLabelNumber = env.GlobalLabelCounter;
-		env.GlobalLabelCounter++;
-		String sLabelName = "_NotEnteringIfLabel_" + env.currentMethod.GetIRName() + "_" + iLabelNumber;
 		env.GeneratedIRCode.add("Compare 0," + sym_type.GetIRName());
 		env.GeneratedIRCode.add("JumpTrue " + sLabelName);
 		boolean has_return_before = env.has_return_in_every_path;
@@ -695,44 +854,65 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 	
 	public SymbolType visit(While stmt, Environment env) 
 	{
+		env.GeneratedIRCode.add("#line " + stmt.getLine());
+		int iLabelNumber = env.GlobalLabelCounter;
+		env.GlobalLabelCounter++;
+		String sLabelName = "_StartWhile_" + env.currentMethod.GetIRName() + "_" + iLabelNumber;
+		env.CurrentWhilesStartLabel.add(sLabelName);
+		env.GeneratedIRCode.add(sLabelName + ":");
 		SymbolType sym_type = stmt.getCondition().accept(this,env);
 		if(!sym_type.isBoolType())
 		{
 			throw new RuntimeException(stmt.getLine()+
 					": Invalid expression inside While, condition is not of boolean type.");
 		}
+		
+		String sEndLabelName = "_EndWhile_" + env.currentMethod.GetIRName() + "_" + iLabelNumber;
+		env.CurrentWhilesExitLabel.add(sEndLabelName);
+		
+		env.GeneratedIRCode.add("Compare 0," + sym_type.GetIRName());
+		env.GeneratedIRCode.add("JumpTrue " + sEndLabelName);
+		
 		boolean has_return_before = env.has_return_in_every_path;
 		env.loop_counter += 1;
 		stmt.getOperation().accept(this, env);
 		env.loop_counter -= 1;
 		env.has_return_in_every_path = has_return_before;
+		
+		env.GeneratedIRCode.add("Jump " + sLabelName);
+		env.GeneratedIRCode.add(sEndLabelName + ":");
+		env.CurrentWhilesStartLabel.remove(env.CurrentWhilesStartLabel.size()-1);
+		env.CurrentWhilesExitLabel.remove(env.CurrentWhilesExitLabel.size() -1);
 		return null;
 	}
 	
 	public SymbolType visit(Break stmt, Environment env)
 	{
+		env.GeneratedIRCode.add("#line(BREAK) " + stmt.getLine());
 		if (env.loop_counter == 0)
 		{
 			throw new RuntimeException(stmt.getLine()+
 					": Invalid  usage of a break statement not inside of loop");
 		}
+		env.GeneratedIRCode.add("Jump " + env.CurrentWhilesExitLabel.get(env.CurrentWhilesExitLabel.size() - 1));
 		return null;
 	}
 
 	public SymbolType visit(Continue stmt,  Environment env)
 	{
+		env.GeneratedIRCode.add("#line " + stmt.getLine());
 		if (env.loop_counter == 0)
 		{
 			throw new RuntimeException(stmt.getLine()+
 					": Invalid  usage of a continue statement not inside of loop");
 		}
+		env.GeneratedIRCode.add("Jump " + env.CurrentWhilesStartLabel.get(env.CurrentWhilesStartLabel.size() - 1));
 		return null;
 	}
 	
 	@Override
 	public SymbolType visit(PrimitiveType ptype, Environment d) {
-		// TODO Auto-generated method stub
-		return SymbolType.getTypeFromAST(ptype, d.symbolTable);
+		return SymbolType.getTypeFromAST(ptype, d.symbolTable).Clone();
 	}
 
 	@Override
@@ -744,11 +924,12 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 			throw new RuntimeException(octype.getLine()+
 					":" + "Unknown type " + octype.getName());
 		}
-		return t1;
+		return t1.Clone();
 	}
 
 	@Override
 	public SymbolType visit(LocalVar lvar, Environment env) {
+		env.GeneratedIRCode.add("#line " + lvar.getLine());
 		if (env.symbolTable.IsDeclaredInCurrentScope(lvar.getName()))
 		{
 			throw new RuntimeException(lvar.getLine()+
@@ -761,6 +942,8 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 					": it is not allowed to define a function and a variable with the same name '" + lvar.getName() + "'");
 		}
 		SymbolType varType = lvar.getType().accept(this, env);
+		varType.SetIRName("local_var_" + lvar.getName() + "_id_" + env.LocalVarIndex);
+		env.LocalVarIndex++;
 		env.symbolTable.InsertNewDecleration(lvar.getName(), varType);
 		if(lvar.hasInitValue())
 		{
@@ -770,13 +953,26 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 				throw new RuntimeException(lvar.getLine()+
 						": it is not allowed to initialize a var with type " + varType.toString() + " with type " + initValType.toString() + " which is not a subtype");
 			}
+			env.GeneratedIRCode.add("Move " + initValType.GetIRName() + ", " + varType.GetIRName());
 		}
 		return null;
 	}
 
 	@Override
 	public SymbolType visit(BoolLiteral bl, Environment d) {
-		return new BoolType();
+		SymbolType type1 = new BoolType();
+		String sIRName = "R" + d.iCurrentAvailableTempNumber;
+		d.iCurrentAvailableTempNumber++;
+		type1.SetIRName(sIRName);
+		if(bl.value == true)
+		{
+			d.GeneratedIRCode.add("Move 1 ," + sIRName);
+		}
+		else
+		{
+			d.GeneratedIRCode.add("Move 0 ," + sIRName);
+		}
+		return type1;
 	}
 
 	@Override
@@ -787,12 +983,23 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 			throw new RuntimeException(exprLength.getLine()+
 					": Length is only accepted to use as part of an array! and this expression is not an array it is of type " + type1.toString());
 		}
-		return new IntType();
+		SymbolType typeLength = new IntType();
+		String sIRName = "R" + d.iCurrentAvailableTempNumber;
+		d.iCurrentAvailableTempNumber++;
+		typeLength.SetIRName(sIRName);
+		d.GeneratedIRCode.add("ArrayLength " + type1.GetIRName() + ", " + sIRName);
+		
+		return typeLength;
 	}
 
 	@Override
 	public SymbolType visit(IntLiteral intLit, Environment d) {
-		return new IntType();
+		SymbolType type1 = new IntType();
+		String sIRName = "R" + d.iCurrentAvailableTempNumber;
+		d.iCurrentAvailableTempNumber++;
+		type1.SetIRName(sIRName);
+		d.GeneratedIRCode.add("Move " + intLit.value + " ," + sIRName);
+		return type1;
 	}
 
 	@Override
@@ -803,16 +1010,31 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 			throw new RuntimeException(nclss.getLine()+
 					": there is no class of with the name " + nclss.classID);
 		}
-		return type1;
+		
+		ClassType clsType1 = (ClassType) type1;
+		int iAmountOfMemoryInBytes = (clsType1.iAmountOfVariables)*4;
+		String sIRName = "R" + d.iCurrentAvailableTempNumber;
+		d.iCurrentAvailableTempNumber++;
+		SymbolType retT = type1.Clone();
+		retT.SetIRName(sIRName);
+		d.GeneratedIRCode.add("Library __allocateObject(" + iAmountOfMemoryInBytes + "), " + sIRName);
+		d.GeneratedIRCode.add("MoveField _VT_" + nclss.classID + ", " + sIRName + ".0");
+		return retT;
 	}
 
 	@Override
 	public SymbolType visit(NullLiteral nllLit, Environment d) {
-		return new NullType();
+		SymbolType type1 = new NullType();
+		String sIRName = "R" + d.iCurrentAvailableTempNumber;
+		d.iCurrentAvailableTempNumber++;
+		type1.SetIRName(sIRName);
+		d.GeneratedIRCode.add("Move 0 ," + sIRName); //define NULL as 0!
+		return type1;
 	}
 
 	@Override
 	public SymbolType visit(Return retStmt, Environment d) {
+		d.GeneratedIRCode.add("#line " + retStmt.getLine());
 		if(d.currentMethod == null)
 		{
 			throw new RuntimeException(retStmt.getLine()+
@@ -843,7 +1065,16 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 						": function and return type mismatch. type(return) " + returnExprType.toString() + 
 						" is not a subtype of function return type " + d.currentMethod.getRetType().toString());
 			}
+			d.GeneratedIRCode.add("Return " + returnExprType.GetIRName());
 			return returnExprType;
+		}
+		if(d.currentMethod.GetIRName().equals("_ic_main"))
+		{
+			d.GeneratedIRCode.add("Library __exit(0), Rdummy");
+		}
+		else
+		{
+			d.GeneratedIRCode.add("Return 9999");
 		}
 		return new VoidType();
 	}
@@ -881,7 +1112,7 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 		}
 		SymbolType[] params = new SymbolType[parTypes.size()];
 		params = parTypes.toArray(params);
-		MethodType ftype2 = new MethodType(params, ftype1.getRetType(), true);
+		MethodType ftype2 = new MethodType(params, ftype1.getRetType().Clone(), true);
 		if(ftype1.getIsStatic() == false)
 		{
 			throw new RuntimeException(sfc.getLine()+
@@ -894,7 +1125,55 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 					": class " + sfc.classID + " member name " + sfc.funcID +
 					"  is of type " + ftype1.toString() + " but expected function of type(because of the parameters) " + ftype2.toString());
 		}
-		return ftype2.getRetType();
+		
+		
+		//generate static call lir code
+		String sCommand;
+		
+		if(sfc.classID.equals("Library"))
+		{
+			sCommand = "Library ";
+		}
+		else
+		{
+			sCommand = "StaticCall ";
+		}
+		
+		sCommand += ftype1.GetIRName() + "(";
+		
+		for(int i = 0; i < ftype1.getArgs().length; i++)
+		{
+			if(ftype1.getArgs()[i].isVoidType())
+			{
+				break;
+			}
+			if(i != 0)
+			{
+				sCommand += ", ";
+			}
+			if(sfc.classID.equals("Library") == false)
+			{
+				sCommand += ftype1.getArgs()[i].GetIRName() + "=";
+			}
+			sCommand += ftype2.getArgs()[i].GetIRName();
+		}
+		
+		sCommand += "), ";
+		if(ftype1.getRetType().isVoidType())
+		{
+			sCommand += "Rdummy";
+		}
+		else
+		{
+			String sIRName = "R" + d.iCurrentAvailableTempNumber;
+			d.iCurrentAvailableTempNumber++;
+			ftype1.getRetType().SetIRName(sIRName);
+			sCommand += sIRName;
+		}
+		
+		d.GeneratedIRCode.add(sCommand);
+		
+		return ftype1.getRetType().Clone();
 	}
 
 	@Override
@@ -909,6 +1188,14 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 				//maybe its a static function call from a static function (implicit one without CLASSNAME.
 				t1 = d.symbolTable.GetClosestVarWithSameName(d.currentClassName);
 				bMustBeStatic = true;
+			}
+			else
+			{
+				t1 = t1.Clone();
+				String sIRName = "R" + d.iCurrentAvailableTempNumber;
+				d.iCurrentAvailableTempNumber++;
+				d.GeneratedIRCode.add("Move this, " + sIRName);
+				t1.SetIRName(sIRName);
 			}
 		}
 		else
@@ -947,7 +1234,7 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 		}
 		SymbolType[] params = new SymbolType[parTypes.size()];
 		params = parTypes.toArray(params);
-		MethodType ftype2 = new MethodType(params, ftype1.getRetType(), ftype1.getIsStatic());
+		MethodType ftype2 = new MethodType(params, ftype1.getRetType().Clone(), ftype1.getIsStatic());
 		if(ftype1.getIsStatic() == true)
 		{
 			if(vfc.prefixExpr != null)
@@ -968,12 +1255,95 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 					": class " + clssT1.toString() + " name " + vfc.funcID +
 					"  is of type " + ftype1.toString() + " but expected function of type(because of the parameters) " + ftype2.toString());
 		}
-		return ftype2.getRetType();
+		
+		if(ftype1.getIsStatic())
+		{
+			//generate static call lir code
+			String sCommand;
+			sCommand = "StaticCall ";
+			
+			sCommand += ftype1.GetIRName() + "(";
+			
+			for(int i = 0; i < ftype1.getArgs().length; i++)
+			{
+				if(ftype1.getArgs()[i].isVoidType())
+				{
+					break;
+				}
+				if(i != 0)
+				{
+					sCommand += ", ";
+				}
+				sCommand += ftype1.getArgs()[i].GetIRName() + "=";
+				sCommand += ftype2.getArgs()[i].GetIRName();
+			}
+			
+			sCommand += "), ";
+			if(ftype1.getRetType().isVoidType())
+			{
+				sCommand += "Rdummy";
+			}
+			else
+			{
+				String sIRName = "R" + d.iCurrentAvailableTempNumber;
+				d.iCurrentAvailableTempNumber++;
+				ftype1.getRetType().SetIRName(sIRName);
+				sCommand += sIRName;
+			}
+			
+			d.GeneratedIRCode.add(sCommand);
+		}
+		else
+		{
+			//generate virtual call lir code
+			String sIRName = "R" + d.iCurrentAvailableTempNumber;
+			d.iCurrentAvailableTempNumber++;
+			d.GeneratedIRCode.add("Move " + clssT1.GetIRName() + ", " + sIRName);
+			String sCommand = "VirtualCall " + sIRName + "." + ftype1.iIndexInVirtualTable + "(";
+			
+			for(int i = 0; i < ftype1.getArgs().length; i++)
+			{
+				if(ftype1.getArgs()[i].isVoidType())
+				{
+					break;
+				}
+				if(i != 0)
+				{
+					sCommand += ", ";
+				}
+				sCommand += ftype1.getArgs()[i].GetIRName() + "=" + ftype2.getArgs()[i].GetIRName();
+			}
+			
+			sCommand += "), ";
+			if(ftype1.getRetType().isVoidType())
+			{
+				sCommand += "Rdummy";
+			}
+			else
+			{
+				String sIRName2 = "R" + d.iCurrentAvailableTempNumber;
+				d.iCurrentAvailableTempNumber++;
+				ftype1.getRetType().SetIRName(sIRName2);
+				sCommand += sIRName2;
+			}
+			
+			d.GeneratedIRCode.add(sCommand);
+		}
+		
+		return ftype1.getRetType().Clone();
 	}
 	
 	@Override
 	public SymbolType visit(StringLiteral slit, Environment d) {
-		return new StringType();
+		String sStrName = "string_literal_" + d.GlobalStringCounter;
+		d.GeneratedIRCode.add(0, sStrName + ": " + slit.value);
+		d.GlobalStringCounter++;
+		SymbolType t1 = new StringType();
+		String sIRName = "R" + d.iCurrentAvailableTempNumber;
+		d.iCurrentAvailableTempNumber++;
+		t1.SetIRName(sIRName);
+		d.GeneratedIRCode.add("Move " + sStrName + " ," + sIRName);
+		return t1;
 	}
 
 	@Override
@@ -984,6 +1354,11 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 			throw new RuntimeException(thisStmt.getLine()+
 					": 'this' could not been found at this context make sure you are inside virtual method of a class");
 		}
+		thisType = thisType.Clone();
+		String sIRName = "R" + d.iCurrentAvailableTempNumber;
+		d.iCurrentAvailableTempNumber++;
+		thisType.SetIRName(sIRName);
+		d.GeneratedIRCode.add("Move this, " + sIRName);
 		return thisType;
 	}
 
@@ -1011,12 +1386,24 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 				throw new RuntimeException(varValLoc.getLine()+
 						": class" + t2.toString() + " member  " + varValLoc.varID + " is a function but used like variable!");
 			}
-			return t1;
+			SymbolType retT = t1.Clone();
+			if(varValLoc.bIsLeftSideOfAssignStmt)
+			{
+				d.GeneratedIRCode.add("MoveField " + varValLoc.sAssignIRName + ", " + t2.GetIRName() + "." + t1.iOffset);
+			}
+			else
+			{
+				String sIRName = "R" + d.iCurrentAvailableTempNumber;
+				d.iCurrentAvailableTempNumber++;
+				d.GeneratedIRCode.add("MoveField " + t2.GetIRName() + "." + retT.iOffset + ", " + sIRName);
+				retT.SetIRName(sIRName);
+			}
+			return retT;
 		}
 		else
 		{
 			t1 = d.symbolTable.GetClosestVarWithSameName(varValLoc.varID);
-			if(t1 == null)
+			if(t1 == null || t1.iOffset >= 0) //that means it is implicit this cause its a class var
 			{
 				ClassType clsThis = (ClassType) d.symbolTable.GetClosestVarWithSameName("This"); //check maybe it is implicit this var
 				if(clsThis != null)
@@ -1024,13 +1411,50 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 					t1 = clsThis.GetMemberFromMeOrClosestParent(varValLoc.varID);
 					if(t1 != null)
 					{
-						return t1;
+						SymbolType retT = t1.Clone();
+						if(retT.iOffset < 0)
+						{
+							throw new RuntimeException(varValLoc.getLine()+
+									": variable of This class offset is not valid for some reason {" + varValLoc.varID + "}");
+						}
+						if(varValLoc.bIsLeftSideOfAssignStmt)
+						{
+							String sIRName = "R" + d.iCurrentAvailableTempNumber;
+							d.iCurrentAvailableTempNumber++;
+							d.GeneratedIRCode.add("Move this, " + sIRName);
+							d.GeneratedIRCode.add("MoveField " + varValLoc.sAssignIRName + ", " + sIRName + "." + retT.iOffset);
+						}
+						else
+						{
+							String sIRName = "R" + d.iCurrentAvailableTempNumber;
+							d.iCurrentAvailableTempNumber++;
+							d.GeneratedIRCode.add("Move this, " + sIRName);
+							String sIRName2 = "R" + d.iCurrentAvailableTempNumber;
+							d.iCurrentAvailableTempNumber++;
+							d.GeneratedIRCode.add("MoveField " + sIRName + "." + retT.iOffset + ", " + sIRName2);
+							retT.SetIRName(sIRName2);
+						}
+						return retT;
 					}
+					
 				}
 				throw new RuntimeException(varValLoc.getLine()+
 						": no variable with the name " + varValLoc.varID + " exists");
 			}
-			return t1;
+			SymbolType retT = t1.Clone();
+			//just a simple local variable (or parameter which is the same)
+			if(varValLoc.bIsLeftSideOfAssignStmt)
+			{
+				d.GeneratedIRCode.add("Move " + varValLoc.sAssignIRName + ", " + retT.GetIRName());
+			}
+			else
+			{
+				String sIRName = "R" + d.iCurrentAvailableTempNumber;
+				d.iCurrentAvailableTempNumber++;
+				d.GeneratedIRCode.add("Move " + retT.GetIRName() + ", " + sIRName);
+				retT.SetIRName(sIRName);
+			}
+			return retT;
 		}
 	}
 
@@ -1050,10 +1474,26 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 		}
 		
 		ArrType arrT = (ArrType)arrType;
+		SymbolType retType;
 		if(arrT.getDimension() == 1) //it is the last dimension we should return a not array type
 		{
-			return arrT.getElemType();
+			retType =  arrT.getElemType().Clone();
 		}
-		return new ArrType(arrT.getElemType(), arrT.getDimension() - 1);
+		else
+		{
+			retType = new ArrType(arrT.getElemType(), arrT.getDimension() - 1);
+		}
+		if(arrValLoc.bIsLeftSideOfAssignStmt)
+		{
+			d.GeneratedIRCode.add("MoveArray " + arrValLoc.sAssignIRName + ", " + arrT.GetIRName() + "[" + indType.GetIRName() + "]");
+		}
+		else
+		{
+			String sIRName = "R" + d.iCurrentAvailableTempNumber;
+			d.iCurrentAvailableTempNumber++;
+			d.GeneratedIRCode.add("MoveArray " + arrT.GetIRName() + "[" + indType.GetIRName() + "]" + ", " + sIRName);
+			retType.SetIRName(sIRName);
+		}
+		return retType;
 	}
 }

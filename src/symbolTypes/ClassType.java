@@ -1,19 +1,34 @@
 package symbolTypes;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ClassType extends SymbolType
 {
 	String name;
 	ClassType superClass;
 	HashMap<String, SymbolType> classMembersAndFucntions;
-
+	List<String> VirtualTable;
+	public int iAmountOfVariables;
 	public ClassType(String name, ClassType superClass)
 	{
 		super("ClassType");
 		this.name = name;
 		this.superClass = superClass;
 		this.classMembersAndFucntions = new HashMap<String, SymbolType>();
+		VirtualTable = null;
+		iAmountOfVariables = 1; // 1 for the virtual table - it is a required one
+	}
+	
+	public SymbolType Clone()
+	{
+		ClassType t1 = new ClassType(name, superClass);
+		t1.classMembersAndFucntions = classMembersAndFucntions;
+		t1.VirtualTable = VirtualTable;
+		t1.iAmountOfVariables = iAmountOfVariables;
+		CopySymbolData(t1);
+		return t1;
 	}
 	
 	public ClassType getSuperClass() {
@@ -26,6 +41,16 @@ public class ClassType extends SymbolType
 	
 	public String getName() {
 		return this.name;
+	}
+	
+	public List<String> GetVirtualTable()
+	{
+		return VirtualTable;
+	}
+	
+	public void SetVirtualTable(List<String> vTable)
+	{
+		VirtualTable = vTable;
 	}
 	
 	@Override

@@ -6,7 +6,12 @@ public class StringType extends SymbolType
 	{
 		super("StringType");
 	}
-	
+	public SymbolType Clone()
+	{
+		StringType t1 = new StringType();
+		CopySymbolData(t1);
+		return t1;
+	}
 	@Override
 	public String toString() 
 	{

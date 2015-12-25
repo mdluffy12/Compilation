@@ -4,6 +4,14 @@ public class ArrType extends SymbolType{
 	
 	private SymbolType valType;
 	private int dimension;
+	
+	public SymbolType Clone()
+	{
+		ArrType arr = new ArrType(valType.Clone(), dimension);
+		CopySymbolData(arr);
+		return arr;
+	}
+	
 	public ArrType(SymbolType valType, int dimension)
 	{
 		super("ArrayType");

@@ -7,6 +7,13 @@ public class NullType extends SymbolType
 		super("NullType");
 	}
 	
+	public SymbolType Clone()
+	{
+		NullType t1 = new NullType();
+		CopySymbolData(t1);
+		return t1;
+	}
+	
 	@Override
 	public String toString()
 	{

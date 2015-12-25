@@ -8,22 +8,28 @@ import slp.VirtualMethod;
 public abstract class SymbolType {
 	protected String name;
 	protected String IRName;
-	static private SymbolType intType = new IntType();
-	static private SymbolType stringType = new StringType();
-	static private SymbolType boolType = new BoolType();
-	static private SymbolType voidType = new VoidType();
-	static private SymbolType nullType = new NullType();
+	public int iOffset;
 	
 	public SymbolType(String name) 
 	{
 		this.name=name;
 		this.IRName = "";
+		iOffset = -1;
 	}
 	
 	public SymbolType(String name, String IRName) 
 	{
 		this.name=name;
 		this.IRName = IRName;
+		iOffset = -1;
+	}
+	
+	public abstract SymbolType Clone();
+	public void CopySymbolData(SymbolType to)
+	{
+		to.name = name;
+		to.IRName = IRName;
+		to.iOffset = iOffset;
 	}
 	
 	public void SetIRName(String IRName)
@@ -71,19 +77,19 @@ public abstract class SymbolType {
 	{
 		if (dataTypeName == slp.DataTypes.INT.getDescription()) 
 		{
-			return intType;
+			return new IntType();
 		} 
 		else if (dataTypeName == slp.DataTypes.STRING.getDescription()) 
 		{
-			return stringType;
+			return new StringType();
 		} 
 		else if (dataTypeName == slp.DataTypes.VOID.getDescription()) 
 		{
-			return voidType;
+			return new VoidType();
 		} 
 		else if (dataTypeName == slp.DataTypes.BOOLEAN.getDescription()) 
 		{
-			return boolType;
+			return new BoolType();
 		} 
 		else 
 		{
@@ -127,6 +133,7 @@ public abstract class SymbolType {
 				{
 					return null;
 				}
+				prms[i].SetIRName(formals.get(i).getName());
 			}
 		}
 		SymbolType retType = getTypeFromAST(method.getType(), table);

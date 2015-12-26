@@ -45,7 +45,7 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 		//System.out.println("Going Over Main Syntax Analysis");
 		root.accept(this, env);
 		
-		WriteGeneratedIRCodeToFile(env, "out.lir");
+		WriteGeneratedIRCodeToFile(env, "output.lir");
 		//System.out.println("Finished Syntax Analysis Successfully");
 	}
 	
@@ -411,14 +411,17 @@ public class SyntaxAnalyzerAndIRGenerator implements PropagatingVisitor<Environm
 	public void GenerateLogicalNotCode(String sRegisterName, Environment env)
 	{
 		env.GeneratedIRCode.add("#logical not");
-		env.GeneratedIRCode.add("Not " + sRegisterName);
 		env.GeneratedIRCode.add("Compare 0, " + sRegisterName); //the bool for true is 1 32 times otherwise we have a problem
 		int iLabelNumber = env.GlobalLabelCounter;
 		env.GlobalLabelCounter++;
 		String sLabelName = "_Label_Logical_Not_" + env.currentMethod.GetIRName() + "_" + iLabelNumber;
+		String sEndLabelName = "_Label_Logical_Not_END_" + env.currentMethod.GetIRName() + "_" + iLabelNumber;
 		env.GeneratedIRCode.add("JumpTrue " + sLabelName);
-		env.GeneratedIRCode.add("Move 1, " + sRegisterName);
+		env.GeneratedIRCode.add("Move 0, " + sRegisterName);
+		env.GeneratedIRCode.add("Jump " + sEndLabelName);
 		env.GeneratedIRCode.add(sLabelName + ":");
+		env.GeneratedIRCode.add("Move 1, " + sRegisterName);
+		env.GeneratedIRCode.add(sEndLabelName + ":");
 	}
 	
 	public SymbolType visit(UnaryOpExpr expr, Environment env) 
